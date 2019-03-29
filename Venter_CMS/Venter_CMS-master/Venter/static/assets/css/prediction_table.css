@@ -34,12 +34,6 @@ Styling for prediction_table.html
     background-color: white;
 }
 
-.added-category{
-    border-radius:5px;
-    -moz-border-radius:5px;
-    -webkit-border-radius:5px;
-  }
-
 .plus-fa{
     color:#ffffff;
 }
@@ -77,9 +71,19 @@ Styling for prediction_table.html
 
 .add-category-btn{
     background-color: #4f92c9;
-    border-radius: 5px;
+    border-radius: 3px;
     border: none;
 }
 .add-category-btn:hover{
     background-color: #295C87;
+}
+
+.select_cat{
+    width:350px;
+}
+
+.input_cat{
+    display:none;
+    width:350px;
+    height: 26px;
 }

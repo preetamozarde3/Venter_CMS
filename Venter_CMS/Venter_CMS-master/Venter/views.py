@@ -289,6 +289,7 @@ def predict_result(request, pk):
         filemeta.save()
     else:
         dict_data = json.load(filemeta.output_file_json)
+
     dict_keys = dict_data.keys()
     domain_list = list(dict_keys)
 
@@ -333,49 +334,68 @@ def domain_contents(request):
 def predict_csv(request, pk):
     """This function is used to handle the selected categories by the user"""
 
-    file_object = File.objects.get(pk=pk)
-    file_name = file_object.filename
+    filemeta = File.objects.get(pk=pk)
+    if not filemeta.has_prediction:
+        output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
 
-    input_file_path = os.path.join(MEDIA_ROOT, f'{file_object.uploaded_by.organisation_name}/{file_object.uploaded_by.user.username}/{file_object.uploaded_date.date()}/input/{file_name}')
+        if not os.path.exists(output_directory_path):
+            os.makedirs(output_directory_path)
 
-    csvfile = pd.read_csv(input_file_path, sep=',', header=0, encoding='latin1')
-    complaint_description = list(csvfile['complaint_description'])
+        print(output_directory_path)
+        output_file_path_json = os.path.join(output_directory_path, 'results.json')
 
-    print("----type of complaint_description---")
-    print(type(complaint_description))
-    print(csvfile['complaint_description'].shape)
+        input_file_path = filemeta.input_file.path
+        csvfile = pd.read_csv(input_file_path, sep=',', header=0, encoding='latin1')
 
-    dict_list = []
-    rows = csvfile.shape[0]
+        complaint_description = list(csvfile['complaint_description'])
 
+        dict_list = []
+
+        if str(request.user.profile.organisation_name) == 'ICMC':
+            model = ClassificationService()
+
+        elif str(request.user.profile.organisation_name) == "SpeakUp":
+            pass
+
+        cats = model.get_top_3_cats_with_prob(complaint_description)
+
+        for row, complaint, scores in zip(csvfile.iterrows(), complaint_description, cats):
+            row_dict = {}
+            index, data = row
+            row_dict['index'] = index
+
+            if str(request.user.profile.organisation_name) == "ICMC":
+                row_dict['problem_description'] = complaint
+                row_dict['category'] = scores
+                row_dict['highest_confidence'] = list(row_dict['category'].values())[0]
+            else:
+                continue
+                # data = data.dropna(subset=["text"])
+                # complaint_description = data['text']
+                # cats = model.get_top_3_cats_with_prob(complaint_description)
+            dict_list.append(row_dict)
+        dict_list = sorted(dict_list, key=lambda k: k['highest_confidence'], reverse=True)
+
+        if dict_list:
+            filemeta.has_prediction = True
+
+        with open(output_file_path_json, 'w') as temp:
+            json.dump(dict_list, temp)
+
+        print('JSON output saved.')
+        print('Done.')
+
+        filemeta.output_file_json = output_file_path_json
+        filemeta.save()
+    else:
+        dict_list = json.load(filemeta.output_file_json)
+    
+    # preparing category list based on organisation name
     if str(request.user.profile.organisation_name) == 'ICMC':
-        model = ClassificationService()
         category_queryset = Category.objects.filter(organisation_name='ICMC').values_list('category', flat=True)
         category_list = list(category_queryset)
+    elif str(request.user.profile.organisation_name) == 'SpeakUp':
+        category_queryset = Category.objects.filter(organisation_name='SpeakUp').values_list('category', flat=True)
+        category_list = list(category_queryset)
 
-    elif str(request.user.profile.organisation_name) == "SpeakUp":
-        pass
-        #do stuff
-        # model = SpeakupClassificationService()
-        # category_list = Category.objects.filter(organisation_name='SpeakUp').values_list('category', flat=True)
-
-    cats = model.get_top_3_cats_with_prob(complaint_description)
-
-    for row, complaint, scores in zip(csvfile.iterrows(), complaint_description, cats):
-        row_dict = {}
-        index, data = row
-        row_dict['index'] = index
-
-        if str(request.user.profile.organisation_name) == "ICMC":
-            row_dict['problem_description'] = complaint
-            row_dict['category'] = scores
-            row_dict['highest_confidence'] = list(row_dict['category'].values())[0]
-        else:
-            continue
-            data = data.dropna(subset=["text"])
-            complaint_description = data['text']
-            cats = model.get_top_3_cats_with_prob(complaint_description)
-        dict_list.append(row_dict)
-    dict_list = sorted(dict_list, key=lambda k: k['highest_confidence'], reverse=True)
-
-    return render(request, './Venter/prediction_table.html', {'dict_list': dict_list, 'category_list': category_list, 'rows':rows})
+    return render(request, './Venter/prediction_table.html', {'dict_list': dict_list, 'category_list': category_list})

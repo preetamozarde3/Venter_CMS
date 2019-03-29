@@ -7,6 +7,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
     <script>
+        function toggleField(hideObj,showObj){
+            hideObj.disabled=true;		
+            hideObj.style.display='none';
+            showObj.disabled=false;	
+            showObj.style.display='inline';
+            showObj.focus();
+        }
+
         function colorcode(num, index) {
             if (num > 90) {
                 $("#" + index).attr("style", "background-color: #00a33b");
@@ -31,22 +39,46 @@
             }
         }
 
-        function remove_category(ul_tag, list_tag){
-            console.log("ul_tag");
-            console.log(ul_tag);
-            $(ul_tag).remove();     
-        }
-        function add_category(ul_id, input_id){
+        $(document).on("click", ".delete-category-btn", function() {
+            var parent = $(this).closest("li");
+            parent.remove();
+        });
+
+
+        function add_category(ul_id, select_id, input_id){
             var ul = $("#"+ul_id);
-            var added_category = $("#"+input_id).val();
-            if (added_category.length==0 || added_category == " ")
-                alert("Please enter a valid input");
-            else
+            if ($("#"+select_id)[0].selectedIndex<=0)
+            {
+                var cat_from_input = $("#"+input_id).val();
+                if (!cat_from_input.replace(/\s/g, '').length)
+                {
+                    alert("Please enter a valid input");
+                }
+                else
+                    {
+                        added_category = cat_from_input;
+                        console.log("cat with $(#input_id): ", added_category);
+                        $(ul)
+                            .append('<li class="list-group-item">'+added_category+'&nbsp;&nbsp;<button type="button" class="delete-category-btn"><i class="fa fa-times delete-fa" aria-hidden="true"></i></button></li>')
+                    }
+                $("#"+input_id).val("");
+            }
+            else{
+            var cat_from_select = $("#"+select_id).val();
+            if (cat_from_select == '0'){
+                alert("Please select a valid category");
+            }
+            else{
+                added_category = cat_from_select;
+                console.log("cat with $(#select_id): ", added_category);
                 $(ul)
-                    .append('<li class="list-group-item" id="'+added_category+'">'+added_category+'&nbsp;&nbsp;<button type="button" id="delete-category-btn" class="delete-category-btn" onclick="remove_category('+ul_id+','+added_category+');"><i class="fa fa-times delete-fa" aria-hidden="true"></i></button></li>')
-                    $("#"+input_id).val("");
+                    .append('<li class="list-group-item">'+added_category+'&nbsp;&nbsp;<button type="button" class="delete-category-btn"><i class="fa fa-times delete-fa" aria-hidden="true"></i></button></li>')
+            }   
+            $("#"+select_id)[0].selectedIndex = 0;
+            }
         }
     </script>
+
 
 <div class="outer-pt">
     <div class="inner-pt">
@@ -56,11 +88,11 @@
                 <form action="" method="get">
                     <div class="form-group row">
                         <div class="col-sm-1">
-                        <input type="submit" value="Search" class="btn btn-primary active">
+                            <input type="submit" value="Search" class="btn btn-primary active">
                         </div>&nbsp;&nbsp;
                         <div class="col-sm-7">
-                            <input type="text" name="q" class="form-control" placeholder="Search file">
-                        </div>
+                            <input type="text" name="q" id="myInput" class="form-control" placeholder="Search file">
+                        </div>    
                     </div>
                 </form>
             </div>
@@ -85,8 +117,8 @@
                 <tbody>
                     {% for item in dict_list %}
                     <tr>
-                        <td class="table-cell-conf-score">{{ item.highest_confidence }}%</td>
-                        <td class="table-cell-cat" id="td{{ item.index }}">
+                        <td class="table-cell-conf-score" id="td{{ item.index }}">{{ item.highest_confidence }}%</td>
+                        <td class="table-cell-cat">
                             <script>colorcode("{{item.highest_confidence}}", "td{{ item.index }}");</script>  
                             <div class="form-group">
                                 <ul class="list-group category_list" id="ul{{ item.index }}">
@@ -95,12 +127,22 @@
                                                 {{ cat }} ({{prob}})%
                                             </li>
                                         {% endfor %}
-                                </ul><br>
-                                <input type="text" placeholder="Type category to add" id="input{{ item.index }}" size="40" class="added-category">
-                                <button type="button" id="add-category-btn" class="add-category-btn" onclick="add_category('ul{{ item.index }}', 'input{{ item.index }}');">
-                                    <i class="fa fa-plus plus-fa" aria-hidden="true"></i>
-                                </button>    
-                            </div>    
+                                </ul><br>     
+                                <div class="input-group">                           
+                                    <select name="category" id="select{{ item.index }}" class="select_cat" onchange="if(this.options[this.selectedIndex].value=='customOption'){toggleField(this,this.nextSibling); this.selectedIndex='0';}">
+                                        <option value="0">---- select ----</option>
+                                        <option value="customOption">[enter your own custom category]</option>
+                                        {% for cat in category_list %}
+                                            <option value="{{ cat }}">{{ cat }}</option>
+                                        {% endfor %}
+                                        <input name="category" id="input{{ item.index }}" class="input_cat" type="text" placeholder="Type category to add" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
+                                    </select>
+                                        
+                                    <button type="button" id="add-category-btn" class="add-category-btn" onclick="add_category('ul{{ item.index }}', 'select{{ item.index }}','input{{ item.index }}');">
+                                        <i class="fa fa-plus plus-fa" aria-hidden="true"></i>
+                                    </button>   
+                                </div>
+                            </div>
                         </td>
                         <td>{{ item.problem_description }}</td>
                     </tr>

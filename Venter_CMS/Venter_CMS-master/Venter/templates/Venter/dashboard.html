@@ -57,11 +57,6 @@
           <td>{{ file.uploaded_date.date }}</td>
           <td>{{ file.uploaded_date.astimezone.time }}</td>
           <td>
-            <script>
-              console.log('{{file.uploaded_by.organisation_name}}');
-              console.log(typeof('{{file.uploaded_by.organisation_name}}'));
-              console.log('{{file.uploaded_by.organisation_name}}'=='CIVIS');
-            </script>
             {% if file.uploaded_by.organisation_name|stringformat:"s" == 'CIVIS' %}
                 {% if not file.has_prediction %}
                   <a href="{% url 'predict_result' file.pk %}">
@@ -74,9 +69,19 @@
                   </a>
                 {% endif %}
             {% else %}
-                <a href="{% url 'predict_csv' file.pk %}">
-                  <button class="btn btn-primary predict-button">Predict CSV</button>
-                </a>
+                {% if not file.has_prediction %}
+                  <a href="{% url 'predict_csv' file.pk %}">
+                    <button class="btn btn-primary predict-button" onclick="showloading();" id="predict-button">Predict</button>
+                  </a>
+                  <div class="loader" id="loader"></div>
+                {% else %}
+                  <a href="{% url 'predict_csv' file.pk %}">
+                      <button class="btn btn-success view-button">View</button>
+                  </a>
+                {% endif %}
+                <!-- <a href="{% url 'predict_csv' file.pk %}">
+                  <button class="btn btn-primary predict-button">Predict</button>
+                </a> -->
             {% endif %}
           </td>
           <td>
