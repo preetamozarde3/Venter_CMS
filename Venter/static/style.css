@@ -19,7 +19,7 @@ Styling for index.html
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
-  font-size: 17px;
+  font-size: 30px;
 }
 
 .topnav .icon {
@@ -46,12 +46,14 @@ color: #58b0e0;
     top: 0;
   }
   .topnav.responsive a.nav-link {
-    float: none;
+    float: center;
     display: block;
-    text-align: left;
+    text-align:left;
+    border: 1px solid;
+    width: 100vw;
   }
-} 
-  
+}  
+ 
 .imagelogo-index {
     width: 80px;
     height: 70px;
@@ -75,10 +77,6 @@ color: #58b0e0;
 }
 .navbar .navbar-custom{
     background-color: black;
-}
-
-#fontsize{
-    font-size: 25px;
 }
 
 .footer {

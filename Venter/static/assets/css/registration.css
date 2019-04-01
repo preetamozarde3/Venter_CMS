@@ -1,6 +1,11 @@
 /*
 Styling for registration.html
 */
+.title {
+  font-family: Copperplate; 
+  font-size: 30px;
+}
+
 @font-face {
     font-family: "Muli-Regular";
     src: url("../../assets/fonts/muli/Muli-Regular.ttf"); }
