@@ -225,4 +225,7 @@ Styling for registration.html
     font-size: 20px;
   }
 
-  /*# sourceMappingURL=style.css.map */
+  .title {
+    font-family: Copperplate; 
+    font-size: 30px;
+  }

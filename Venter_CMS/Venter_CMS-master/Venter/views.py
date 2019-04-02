@@ -1,8 +1,10 @@
 import datetime
 import json
 import os
+
 import jsonpickle
 import pandas as pd
+from django import template
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Permission, User
@@ -16,13 +18,13 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
-# import Venter.upload_to_google_drive
 from Backend.settings import MEDIA_ROOT
 from Venter.forms import ContactForm, CSVForm, ExcelForm, ProfileForm, UserForm
 from Venter.models import Category, File, Profile
 
 from .ML_model.Civis.modeldriver import SimilarityMapping
 from .ML_model.ICMC.model.ClassificationService import ClassificationService
+
 
 @login_required
 @never_cache
@@ -245,6 +247,7 @@ class FileListView(LoginRequiredMixin, ListView):
             result = [file_obj for file_obj in result if query in file_obj.filename.lower()]
         return result
 
+
 dict_data = {}
 domain_list = []
 
@@ -254,7 +257,7 @@ def predict_result(request, pk):
 
     filemeta = File.objects.get(pk=pk)
     if not filemeta.has_prediction:
-        output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+        output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}\{filemeta.uploaded_by.user.username}\{filemeta.uploaded_date.date()}\output')
 
         if not os.path.exists(output_directory_path):
             os.makedirs(output_directory_path)
@@ -289,6 +292,9 @@ def predict_result(request, pk):
         filemeta.save()
     else:
         dict_data = json.load(filemeta.output_file_json)
+
+    # print("dict data")
+    # print(dict_data)    
 
     dict_keys = dict_data.keys()
     domain_list = list(dict_keys)
@@ -330,9 +336,57 @@ def domain_contents(request):
         'domain_stats': jsonpickle.encode(domain_stats), 'chart_domain': domain_name
     })
 
-@require_http_methods(["POST", "GET"])
+
+
+# @require_http_methods(["GET"])
+# def predict_result(request, pk):
+#     global dict_data, domain_list
+
+#     filemeta = File.objects.get(pk=pk)
+#     if not filemeta.has_prediction:
+#         output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+
+#         if not os.path.exists(output_directory_path):
+#             os.makedirs(output_directory_path)
+
+#         output_file_path_json = os.path.join(output_directory_path, 'results.json')
+#         output_file_path_xlsx = os.path.join(output_directory_path, 'results.xlsx')
+
+#         sm = SimilarityMapping(filemeta.input_file.path)
+#         dict_data = sm.driver()
+
+#         if dict_data:
+#             filemeta.has_prediction = True
+
+#         with open(output_file_path_json, 'w') as temp:
+#             json.dump(dict_data, temp)
+
+#         print('JSON output saved.')
+#         print('Done.')
+
+#         filemeta.output_file_json = output_file_path_json
+
+#         download_output = pd.ExcelWriter(output_file_path_xlsx, engine='xlsxwriter')
+
+#         for domain in dict_data:
+#             print('Writing Excel for domain %s' % domain)
+#             df = pd.DataFrame({key:pd.Series(value) for key, value in dict_data[domain].items()})
+#             df.to_excel(download_output, sheet_name=domain)
+#         download_output.save()
+
+#         filemeta.output_file_xlsx = output_file_path_xlsx
+#         filemeta.save()
+#     else:
+#         dict_data = json.load(filemeta.output_file_json)
+#     dict_keys = dict_data.keys()
+#     domain_list = list(dict_keys)
+
+#     return render(request, './Venter/prediction_result.html', {
+#         'domain_list': domain_list, 'dict_data': dict_data
+#     })
+
+@require_http_methods(["GET", "POST"])
 def predict_csv(request, pk):
-    """This function is used to handle the selected categories by the user"""
 
     filemeta = File.objects.get(pk=pk)
     if not filemeta.has_prediction:

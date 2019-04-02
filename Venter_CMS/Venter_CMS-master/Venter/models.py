@@ -32,7 +32,7 @@ class Organisation(models.Model):
         blank=True
     )
 
-    def __str__(self):
+    def __str__(self):  
         return self.organisation_name
 
 

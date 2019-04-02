@@ -16,12 +16,10 @@
     <div class="row">
       <div class="col-sm-9">
         <form action="{% url 'dashboard' %}" method="get">
-            <div class="form-group row">
-                <div class="col-sm-1">
-                  <input type="submit" value="Search" class="btn btn-primary active">
-                </div>&nbsp;&nbsp;
-                <div class="col-sm-9">
-                    <input type="text" name="q" class="form-control" placeholder="Search file">
+            <div class="form-group row">               
+                <input type="submit" value="Search" class="btn btn-primary active">
+                <div class="searchdiv">
+                  <input type="text" class="searchbar" placeholder="   Search file  "> <br>
                 </div>
             </div>
         </form>
@@ -79,15 +77,18 @@
                       <button class="btn btn-success view-button">View</button>
                   </a>
                 {% endif %}
-                <!-- <a href="{% url 'predict_csv' file.pk %}">
-                  <button class="btn btn-primary predict-button">Predict</button>
-                </a> -->
             {% endif %}
           </td>
           <td>
-            <a href="{{file.output_file_xlsx}}", download="results.xlsx">
+            {% if not file.has_prediction %}
+            <a>
               <i class="fa fa-download download-fa" aria-hidden="true"></i>
-            </a>
+            </a>  
+            {% else %}
+              <a href="{{file.output_file_xlsx}}", download="results.xlsx">
+                <i class="fa fa-download download-fa" aria-hidden="true"></i>
+              </a>
+            {% endif %}  
           </td>
             {% if user.is_staff == True %}
             <td>
@@ -106,7 +107,7 @@
     <div class="div-pagination">
         {% block pagination %}
         {% if is_paginated %}
-        <ul class="pagination justify-content-center">
+        <ul class="pagination justify-contentç" style="bottom:10px;">
           {% if page_obj.has_previous %}
           <li class="page-item">
             <a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Previous</a>
@@ -134,7 +135,7 @@
             <a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Next</a>
           </li>
           {% else %}
-          <li class="page-item" disabled="">
+          <li class="page-item disabled">
             <a class="page-link">Next</a>
           </li>
           {% endif %}

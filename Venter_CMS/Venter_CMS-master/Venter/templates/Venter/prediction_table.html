@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="../../static/assets/css/prediction_table.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
+
     <script>
         function toggleField(hideObj,showObj){
             hideObj.disabled=true;		
@@ -39,13 +40,24 @@
             }
         }
 
-        $(document).on("click", ".delete-category-btn", function() {
+        $(document).on("click", ".delete-custom-category-btn", function() {
             var parent = $(this).closest("li");
             parent.remove();
         });
 
+        $(document).on("click", ".change-selection-btn", function() {
+            var parent = $(this).closest("li");
+            if(parent.attr("style") == "text-decoration:line-through")
+            {
+                parent.attr("style", "text-decoration:none");
+            }
+            else{
+                parent.attr("style", "text-decoration:line-through");
+            }
+            
+        });
 
-        function add_category(ul_id, select_id, input_id){
+        function add_custom_category(ul_id, select_id, input_id){
             var ul = $("#"+ul_id);
             if ($("#"+select_id)[0].selectedIndex<=0)
             {
@@ -57,9 +69,8 @@
                 else
                     {
                         added_category = cat_from_input;
-                        console.log("cat with $(#input_id): ", added_category);
                         $(ul)
-                            .append('<li class="list-group-item">'+added_category+'&nbsp;&nbsp;<button type="button" class="delete-category-btn"><i class="fa fa-times delete-fa" aria-hidden="true"></i></button></li>')
+                                .append('<li>'+added_category+'&nbsp;&nbsp;<button type="button" class="delete-custom-category-btn"><i class="fa fa-times delete-fa" aria-hidden="true"></i></button></li>')
                     }
                 $("#"+input_id).val("");
             }
@@ -70,14 +81,88 @@
             }
             else{
                 added_category = cat_from_select;
-                console.log("cat with $(#select_id): ", added_category);
                 $(ul)
-                    .append('<li class="list-group-item">'+added_category+'&nbsp;&nbsp;<button type="button" class="delete-category-btn"><i class="fa fa-times delete-fa" aria-hidden="true"></i></button></li>')
+                    .append('<li>'+added_category+'&nbsp;&nbsp;<button type="button" class="delete-custom-category-btn"><i class="fa fa-times delete-fa" aria-hidden="true"></i></button></li>')
             }   
             $("#"+select_id)[0].selectedIndex = 0;
             }
         }
-    </script>
+
+        function download_file()
+        {
+            console.log("excel");
+            window.open('data:application/vnd.ms-excel,' + $('#container-table').html());
+            e.preventDefault();
+        }
+
+        $(document).ready(function(){
+            $("#myInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#tbody_table tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("main_content_table");
+            switching = true;
+            //Set the sorting direction to ascending:
+            dir = "asc"; 
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = table.rows;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (i = 1; i < (rows.length - 1); i++) {
+                //start by saying there should be no switching:
+                shouldSwitch = false;
+                /*Get the two elements you want to compare,
+                one from current row and one from the next:*/
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                /*check if the two rows should switch place,
+                based on the direction, asc or desc:*/
+                if (dir == "asc") {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    //if so, mark as a switch and break the loop:
+                    shouldSwitch= true;
+                    break;
+                    }
+                } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    //Each time a switch is done, increase this count by 1:
+                    switchcount ++;      
+                } else {
+                    /*If no switching has been done AND the direction is "asc",
+                    set the direction to "desc" and run the while loop again.*/
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+            }
+
+            $(document).ready(function(){
+    $('#main_content_table').dataTable();
+});
+</script>
 
 
 <div class="outer-pt">
@@ -85,50 +170,64 @@
 
         <div class="row">
             <div class="col-sm-9">
-                <form action="" method="get">
                     <div class="form-group row">
-                        <div class="col-sm-1">
-                            <input type="submit" value="Search" class="btn btn-primary active">
-                        </div>&nbsp;&nbsp;
-                        <div class="col-sm-7">
-                            <input type="text" name="q" id="myInput" class="form-control" placeholder="Search file">
+                        <div class="col-sm-5">
+                            <input type="text" id="myInput" class="form-control" placeholder="Search">
                         </div>    
+                        <div class="col-sm-1">
+                            <button onclick="sortTable(0);" class="cross_button"> 
+                                    <i class="fa fa-times times-fa" aria-hidden="true"></i>
+                            </button>
+                        </div>  
                     </div>
-                </form>
             </div>
             <div class="col-sm-1">
-                <a href="">
-                <button type="button" class="btn btn-primary download-button">
-                    Download File &nbsp;<i class="fa fa-download download-fa" aria-hidden="true"></i>
+                <button type="button" class="btn btn-primary download-button" onclick="download_file();">Download File &nbsp;<i class="fa fa-download download-fa" aria-hidden="true"></i>
                 </button>
-                </a>
             </div>
         </div><br>
 
         <div id="container-table">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped" id="main_content_table">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Highest Confidence</th>
-                        <th class="table-cell-cat">Predicted Categories</th>
-                        <th>Problem Description</th>
+                        <th>
+                            Highest Confidence Score &nbsp; &nbsp;
+                            <button onclick="sortTable(0);" class="filter_button"> 
+                                <i class="fa fa-filter fa-2x filter-fa" aria-hidden="true"></i>
+                            </button>
+                        </th>
+                        <th class="table-cell-cat">
+                            Predicted Categories &nbsp; &nbsp; 
+                            <button  onclick="sortTable(1);" class="filter_button">
+                                <i class="fa fa-filter fa-2x filter-fa" aria-hidden="true"></i>
+                            </button>
+                        </th>
+                        <th>
+                            Problem Description &nbsp; &nbsp; 
+                            <button onclick="sortTable(2);" class="filter_button">
+                                <i class="fa fa-filter fa-2x filter-fa" aria-hidden="true"></i>
+                            </button>
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody_table">
                     {% for item in dict_list %}
                     <tr>
-                        <td class="table-cell-conf-score" id="td{{ item.index }}">{{ item.highest_confidence }}%</td>
+                        <td class="table-cell-conf-score" id="td{{ item.index }}">
+                            {{ item.highest_confidence }}%
+                        </td>
                         <td class="table-cell-cat">
                             <script>colorcode("{{item.highest_confidence}}", "td{{ item.index }}");</script>  
-                            <div class="form-group">
-                                <ul class="list-group category_list" id="ul{{ item.index }}">
-                                        {% for cat, prob in item.category.items %}
-                                            <li class="list-group-item">
-                                                {{ cat }} ({{prob}})%
-                                            </li>
-                                        {% endfor %}
-                                </ul><br>     
-                                <div class="input-group">                           
+                                <ul class="category_list" id="ul{{ item.index }}">
+                                    {% for cat, prob in item.category.items %}
+                                    <div class="input-group">
+                                        <li class="change-selection-btn">
+                                            {{ cat }} ({{prob}})%
+                                        </li>
+                                    </div>    
+                                    {% endfor %}
+                                </ul> 
                                     <select name="category" id="select{{ item.index }}" class="select_cat" onchange="if(this.options[this.selectedIndex].value=='customOption'){toggleField(this,this.nextSibling); this.selectedIndex='0';}">
                                         <option value="0">---- select ----</option>
                                         <option value="customOption">[enter your own custom category]</option>
@@ -138,13 +237,13 @@
                                         <input name="category" id="input{{ item.index }}" class="input_cat" type="text" placeholder="Type category to add" disabled="disabled" onblur="if(this.value==''){toggleField(this,this.previousSibling);}">
                                     </select>
                                         
-                                    <button type="button" id="add-category-btn" class="add-category-btn" onclick="add_category('ul{{ item.index }}', 'select{{ item.index }}','input{{ item.index }}');">
+                                    <button type="button" id="add-custom-category-btn" class="add-custom-category-btn" onclick="add_custom_category('ul{{ item.index }}', 'select{{ item.index }}','input{{ item.index }}');">
                                         <i class="fa fa-plus plus-fa" aria-hidden="true"></i>
-                                    </button>   
-                                </div>
-                            </div>
+                                    </button>  
                         </td>
-                        <td>{{ item.problem_description }}</td>
+                        <td class="table-cell-problem" id="table-cell-problem">
+                            {{ item.problem_description }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
