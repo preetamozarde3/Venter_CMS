@@ -33,4 +33,6 @@ urlpatterns = [
     path('domain_contents/', views.domain_contents, name='domain_contents'),
     # ex: /venter/predict_csv/5/
     path('predict_csv/<int:pk>', views.predict_csv, name='predict_csv'),
+    # ex: /venter/download_table/5/
+    path('download_table/<int:pk>', views.download_table, name='download_table')
 ]

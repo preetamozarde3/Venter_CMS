@@ -83,7 +83,7 @@ def categorizer():
     stats = open('stats.txt', 'w', encoding='utf-8')
 
     st = time.time()
-    wordmodelfile = 'Venter\ML_model\Civis\GoogleNews-vectors-negative300.bin'
+    wordmodelfile = 'Venter/ML_model/Civis/GoogleNews-vectors-negative300.bin'
     wordmodel = KeyedVectors.load_word2vec_format(wordmodelfile, binary = True, limit=200000)
     et = time.time()
     s = 'Word embedding loaded in %f secs.' % (et-st)
@@ -91,8 +91,8 @@ def categorizer():
     stats.write(s + '\n')
 
     #filepaths
-    responsePath = 'Venter\ML_model\Civis\data\comments'
-    categoryPath = 'Venter\ML_model\Civis\data\sentences'
+    responsePath = 'Venter/ML_model/Civis/data/comments/'
+    categoryPath = 'Venter/ML_model/Civis/data/sentences/'
     responseDomains = os.listdir(responsePath)
     categoryDomains = os.listdir(categoryPath)
     
@@ -105,11 +105,11 @@ def categorizer():
 
         print('Categorizing %s domain...' % domain)
 
-        temp = open(os.path.join(responsePath,responseDomain), 'r', encoding='utf-8-sig')
+        temp = open(os.path.join(responsePath, responseDomain), 'r', encoding='utf-8-sig')
         responses = temp.readlines()
         rows = len(responses)
 
-        temp = open(os.path.join(categoryPath,categoryDomain), 'r', encoding='utf-8-sig')
+        temp = open(os.path.join(categoryPath, categoryDomain), 'r', encoding='utf-8-sig')
         categories = temp.readlines()
         columns = len(categories)
         categories.append('Novel')

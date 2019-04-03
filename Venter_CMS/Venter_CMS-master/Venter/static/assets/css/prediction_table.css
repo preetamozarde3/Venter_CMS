@@ -20,6 +20,7 @@ Styling for prediction_table.html
 
 .table>thead>tr>th {
     text-align: center !important;
+    font-size: 12px;
 }
 
 .table td{
@@ -37,6 +38,7 @@ td.table-cell-cat{
 .table-cell-conf-score{
     text-align: center !important;
     font-weight: bold;
+    width: 90px;
 }
 
 .category_list{
@@ -141,3 +143,32 @@ td.table-cell-cat{
     width:360px;
     height: 26px;
 }
+
+.modal-body {
+    height: 180px;
+    background-color: #32bc65;
+  }   
+  
+  .file_logo-table{
+    width:150px;
+    height:140px;
+  }
+  
+  .modal-footer{
+    height: 150px;
+    background-color: white;
+  }
+  
+  .footer-center{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .p1-update{
+    color: grey;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 20px;
+  }
+
+

@@ -43,6 +43,32 @@ Styling for upload_file.html
   cursor: pointer;
   border-radius: 10px;
 }
+.modal-body{
+  height: 180px;
+  background-color: #32bc65;
+}   
+
+.file_logo-upload{
+  width:150px;
+  height:140px;
+}
+
+.modal-footer{
+  height: 200px;
+  background-color: white;
+}
+
+.footer-center{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.p1-upload{
+  color: grey;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 20px;
+}
 
 /* .outer-upload-file{
   background-color: lightgray;

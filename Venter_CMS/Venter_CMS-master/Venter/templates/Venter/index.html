@@ -21,43 +21,47 @@
 </head>
 <body>
         <div class="topnav" id="myTopnav">
-            <a href="{% url 'home' %}">
-                    <img src="../../static/assets/img/logo_3.png" alt="logo" class="imagelogo-index">
-            </a>
-            <label class="app-label">Venter</label>
-            <div class="test"> 
-                <a class="nav-link" href="{% url 'login' %}">
-                        Login
-                </a>    
-                <a class="nav-link" href="{% url 'contact_us' %}">
-                    Contact Us
+                <a href="{% url 'home' %}">
+                        <img src="../../static/assets/img/logo_3.png" alt="logo" class="imagelogo-index">
                 </a>
-                <a href="javascript:void(0);" class="icon" onclick="myFunction()">
-                        <i class="fa fa-bars"></i>
-                </a>
+                <label class="app-label">Venter</label>
+                <div class="test"> 
+                    <a class="nav-link" href="{% url 'login' %}">
+                            <div class="test">
+                                Login
+                            </div>
+                    </a>    
+                    <a class="nav-link" href="{% url 'contact_us' %}">
+                            <div class="test">
+                                    Contact Us
+                                </div>
+                    </a>
+                    <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+                            <i class="fa fa-bars"></i>
+                    </a>
+                </div>
             </div>
-        </div>
-    
-      <!-- Main content -->
-      <div class="content-index">
-              {% block content %}
-              {% endblock %}
-      </div>
-      <div class="footer">
-          <p>© 2018 Venter . All Rights Reserved | Design by
-            <a href="http://www.iitb.ac.in/" target="_blank">IIT Bombay, Powai</a>
-          </p>
-      </div>
-        <script>
-            function myFunction() {
-                var x = document.getElementById("myTopnav");
-                if (x.className === "topnav") {
-                x.className += " responsive";
-                } else {
-                x.className = "topnav";
+        
+          <!-- Main content -->
+          <div class="content-index">
+                  {% block content %}
+                  {% endblock %}
+          </div>
+          <div class="footer">
+              <p>© 2018 Venter . All Rights Reserved | Design by
+                <a href="http://www.iitb.ac.in/" target="_blank">IIT Bombay, Powai</a>
+              </p>
+          </div>
+            <script>
+                function myFunction() {
+                    var x = document.getElementById("myTopnav");
+                    if (x.className === "topnav") {
+                    x.className += " responsive";
+                    } else {
+                    x.className = "topnav";
+                    }
                 }
-            }
-        </script>
+            </script>
 </body>
 
 <!--   Core JS Files   -->

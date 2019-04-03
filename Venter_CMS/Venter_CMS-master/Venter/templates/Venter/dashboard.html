@@ -19,7 +19,7 @@
             <div class="form-group row">               
                 <input type="submit" value="Search" class="btn btn-primary active">
                 <div class="searchdiv">
-                  <input type="text" class="searchbar" placeholder="   Search file  "> <br>
+                  <input type="text" class="searchbar" placeholder="Search file"> <br>
                 </div>
             </div>
         </form>
@@ -85,7 +85,7 @@
               <i class="fa fa-download download-fa" aria-hidden="true"></i>
             </a>  
             {% else %}
-              <a href="{{file.output_file_xlsx}}", download="results.xlsx">
+              <a href="{{file.output_file_xlsx.url}}", download="results.xlsx">
                 <i class="fa fa-download download-fa" aria-hidden="true"></i>
               </a>
             {% endif %}  
@@ -147,9 +147,9 @@
   {% else %}
   <div class="inner-db-no-file">
     <div class="uploadtext">Upload File</div>
-    <div class="file-upload">
+    <div class="fileupload">
       <a href="{% url 'upload_file' %}">
-        <i class="fa fa-arrow-up"></i>
+        <i class="fa fa-arrow-up arrow-fa"></i>
       </a>
     </div>
   </div>
