@@ -2,9 +2,6 @@
 Styling for login.html
 */
 
-/*
-Styling for login.html
-*/
 body{
   background-color: #accffe;
 }
@@ -105,96 +102,3 @@ span.psw {
        float: none;
     }
   }
-
-/* input {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 10px 0;
-    display: inline-block; 
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    border-radius: 2px; 
-  }
-
-  .out{
-      height: 100vh;
-      max-width: 100vw;
-      background: 100%;
-      background-color: #accffe;
-      padding: 5px 15px; 
-  }
-  .submit-login {
-    background-color: #58b0e0;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    width: 100px;
-    height: 50px;
-    cursor: pointer;
-    border-radius: 6px;
-  }
-  
-  .submit-login:hover {
-    opacity: 0.6;
-  }
-  
-  .wrapper{
-    overflow: hidden;
-  }
-  .main_container{
-      width: 450px;
-      height: 600px;
-      background-color: white;
-      border-radius: 40px;
-      height: auto;
-      margin: 0 auto;
-      top: 10%;
-      position: relative;
-  }
-  
-  .image_container {
-    text-align: center;
-  }
-
-  .bottom_container {
-    text-align: center;
-  }
-
-  .login-image{
-      width: 300px;
-  }
-  .container-fluid {
-    padding: 0px;
-  }
-  
-  span.psw {
-    float: right;
-    padding-top: 16px;
-  }
-
-  .field_container label{
-    font-family: 'Times New Roman', Times, serif;
-  }
-
-  .icon{
-    font-size: 25px;
-  }
-
-  .input-group-addon{
-    background-color: lightgray;
-    width: 20%;
-    padding: 12px 20px;
-    margin: 10px 0;
-    display: inline-block; 
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    border-radius: 2px; 
-  }
-
-  @media screen and (max-width: 300px) {
-    span.psw {
-       display: block;
-       float: none;
-    }
-  } */
