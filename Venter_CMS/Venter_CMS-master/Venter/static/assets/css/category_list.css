@@ -5,7 +5,6 @@ Styling for category_list.html
 .outer-category{
     height: 100vh;
     display: flex;
-    align-items: center;
     justify-content: center;
 }
 

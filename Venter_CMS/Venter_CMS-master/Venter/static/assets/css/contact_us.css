@@ -52,7 +52,7 @@ button:hover {
 .txt2 {
   font-family: Poppins-Regular;
   font-size: 15px;
-  color: #999999;
+  color: #f0ebeb;
 }
 
 .txt3 {
@@ -123,7 +123,7 @@ button:hover {
     height: 100%;
     top: 0;
     left: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.5);
   }
 
 
