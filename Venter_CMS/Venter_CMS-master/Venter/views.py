@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-
 import jsonpickle
 import pandas as pd
 from django.contrib.auth.decorators import login_required
