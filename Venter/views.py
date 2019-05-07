@@ -378,8 +378,8 @@ def predict_result(request, pk):
             domain_stats.append(column)
         dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
 
-    # with open('test_dict_data1.json', 'w') as temp:
-    #     json.dump(dict_data, temp)
+    with open('test_dict_data1.json', 'w') as temp:
+        json.dump(dict_data, temp)
     return render(request, './Venter/prediction_result.html', {
         'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'domain_data': domain_data,
     })

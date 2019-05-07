@@ -16,75 +16,28 @@
         $('.nav-tabs li').removeClass('active');
         $(this).addClass('active');
         $(this).find("a").attr("style", "background-color: rgb(0,0,255) !important; color: rgb(255,255,255) !important");
-        // console.log($(this).find("a").attr("href"));
         var domain_name = $(this).find("a").attr("href");
         drawStuff(domain_name);
       });
 
-      $('.nav-pills > li').on('shown.bs.tab', function(){
-        var h = $('.nav-pills .active > a').attr('href');
-        console.log(h);
+      $('.nav-pills > li').click(function(event){
+        $('.nav-pills > li.active').find("a").attr("style", "background-color: rgb(255,255,255) !important; color: rgb(0,0,0) !important");
+        $('.nav-pills li').removeClass('active');
+        $(this).addClass('active');
+        $(this).find("a").attr("style", "background-color: rgb(0,0,255) !important; color: rgb(255,255,255) !important");
+      });
+      
+      $('#pill-cardview').click(function(event){
+        var domain_name = $('.nav-tabs .active > a').attr('href');
+        console.log("saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", domain_name);
+        cardview(domain_name);
       });
 
-      $("#graph").tab('show');
-
-      // $("#graph").on('show.bs.tab', function(e) {
-      //   console.log('graph tab to be shown');
-      //   var d = $('.nav-tabs .active > a').attr('href');
-      //   console.log("just checking if active domain:", d);
-      // });
-
-      // $("#cardview").on('shown.bs.tab', function(e) {
-      //   console.log('graph tab is shown');
-      //   var d = $('.nav-tabs .active > a').attr('href');
-      //   console.log("just checking if active domain:", d);
-      // });
-
-      // $("#cardview").on('show.bs.tab', function(e) {
-      //   console.log('cardview tab to be shown');
-      //   var d = $('.nav-tabs .active > a').attr('href');
-      //   console.log("just checking if active domain:", d);
-      // });
-
-
-      // $("#cardview").on('shown.bs.tab', function(e) {
-      //   console.log('cardview tab is shown');
-      //   var d = $('.nav-tabs .active > a').attr('href');
-      //   console.log("just checking if active domain:", d);
-      //   var main_dict = jQuery.parseJSON('{{dict_data|escapejs}}');
-      //   var domain_name = 'Traffic';
-      //   var stats = main_dict[domain_name];
-      //   for(var key in stats){
-      //     if(key == 'Statistics'){
-      //       continue;
-      //     }
-      //     else{
-      //       var response_arr=stats[key];
-      //       if(key == 'Novel')
-      //       {
-      //         console.log("NOVEL CATEGORY");
-      //         var count = 1;
-      //         for(var sub in response_arr){
-      //           console.log("sub category "+ count);
-      //           for(var response in response_arr[sub]){
-      //             console.log(response_arr[sub][response]);
-      //           }
-      //           count++;
-      //         }
-      //       }
-      //       else
-      //       {
-      //         continue;
-      //         console.log("Card Category:", key);
-      //         for (var j = 0; j < response_arr.length; j++){
-      //           console.log("response: ",response_arr[j]['response']);
-      //           console.log("score: ",response_arr[j]['score']);
-      //         }
-      //       }  
-      //     }
-      //   }
-      // });
-
+      $('#pill-graph').click(function(event){
+        var domain_name = $('.nav-tabs .active > a').attr('href');
+        $("#graph").tab('show');
+        drawStuff(domain_name);
+      });
 
       $("#chart-download-container").hide();
    
@@ -142,6 +95,12 @@
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(drawStuff);
     function drawStuff(domain_name) {
+      // $("#cardview").hide();
+      $("#graph").tab('show');
+      $('.nav-pills > li.active').find("a").attr("style", "background-color: rgb(255,255,255) !important; color: rgb(0,0,0) !important");
+      $('.nav-pills li').removeClass('active');
+      $("#pill-graph").addClass('active');
+      $("#pill-graph").find("a").attr("style", "background-color: rgb(0,0,255) !important; color: rgb(255,255,255) !important");
       if (!domain_name) {
         var domain_name = $('.nav-tabs .active > a').attr('href');
       }
@@ -229,6 +188,48 @@
       chart.draw(data, options);
       $("#chart-download-container").show();
     };
+    function cardview(domain_name){
+      // $("#graph").hide();
+      $("#cardview").tab('show');
+      var main_dict = jQuery.parseJSON('{{dict_data|escapejs}}');
+        var stats = main_dict[domain_name];
+        for(var key in stats){
+          if(key == 'Statistics'){
+            continue;
+          }
+          else{
+            var response_arr=stats[key];
+            // document.getElementsByClassName("card").id = key;
+            $(".card").attr("id", key);
+            if(key == 'Novel')
+            {
+              console.log("NOVEL CATEGORY");
+              var count = 1;
+              for(var sub in response_arr){
+                console.log("sub category "+ count);
+                for(var response in response_arr[sub]){
+                  console.log(response_arr[sub][response]);
+                }
+                count++;
+              }
+            }
+            else
+            {
+              // continue;
+              $(".label-category").text(key);
+              console.log("Card Category:", key);
+              for (var j = 0; j < response_arr.length; j++){
+                $('.test-class > .list-group-item').text(response_arr[j]['response']);
+                var score = response_arr[j]['score'];
+                score = score + "%";
+                $(".response_list > .list-group-item > .response_score").text(score);
+                console.log("response: ",response_arr[j]['response']);
+                console.log("score: ",response_arr[j]['score']);
+              }
+            }  
+          }
+        }
+    }
   </script>
   
   
@@ -271,13 +272,12 @@
     <div class="tab-content">
       <div id="cardview" class="tab-pane fade content-cardview">
         <div class="card-container" id="card-container">
-          {% for category,response in domain_data.items %}
-            {% if category == 'Statistics' %}
+          {% if category == 'Statistics' %}
               <!--continue-->
             {% else %}
-              <div class="card" id="{{category}}">
+              <div class="card" id="id">
                 <div class="card-header">
-                  <label class="label-category">{{category}}</label>
+                  <label class="label-category" id="test-id">cat</label>
                   <hr>
                 </div>
                 <div class="card-body">
@@ -301,10 +301,12 @@
                       {% else %}
                         <ul class="list-group response_list">
                             {% for r in response %}
+                            <div class="test-class">
                                 <li class="list-group-item">
-                                    {{r.response}}
-                                    <span class="response_score">{{r.score}}%</span>
-                                </li> <br>
+                                  
+                                    response
+                                    <span class="response_score">score</span>
+                                </li></div> <br>
                             {% endfor %}
                         </ul>    
                       {% endif %}
@@ -313,7 +315,6 @@
                 </div>
               </div>
             {% endif %}  
-          {% endfor %}
         </div>
       </div>
   
