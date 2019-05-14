@@ -21,7 +21,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
-from Backend.settings import ADMINS, MEDIA_ROOT, BASE_DIR
+from Backend.settings import ADMINS, BASE_DIR, MEDIA_ROOT
 from Venter.forms import ContactForm, CSVForm, ExcelForm, ProfileForm, UserForm
 from Venter.models import Category, File, Profile
 
@@ -387,6 +387,8 @@ def predict_result(request, pk):
     return render(request, './Venter/prediction_result.html', {
         'domain_list': domain_list, 'dict_data': json.dumps(dict_data)
     })
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def predict_csv(request, pk):
@@ -631,4 +633,3 @@ def visualization_dashboard(request, pk):
 
     if request.method == 'GET':
         return render(request, './Venter/visualization_dashboard.html', {'filemeta': filemeta})
-
