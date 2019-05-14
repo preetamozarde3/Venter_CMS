@@ -22,9 +22,16 @@
     var data = new google.visualization.arrayToDataTable(stats);
       // Create the chart to edit.
       var wrapper = new google.visualization.ChartWrapper({
-         'chartType':'LineChart',
+         'chartType':'ColumnChart',
          'dataTable':data,
-         'options': {'title':'test'}
+         'options': {'title':'test', 
+                      width: '1100',
+                      height: '600',
+                      isStacked: true,
+                      legend: {
+                        position: 'none'
+                      },
+                    }
       });
 
       chartEditor = new google.visualization.ChartEditor();
@@ -39,11 +46,9 @@
 
   </script>
 <div class="outer-vd">
-    <div class="inner-vd">
         <p> Try Me...
             <input type="submit" name="loadcharteditor" id="loadcharteditor" value="Edit me!" onclick="loadEditor()" style="font-size:18px;">
         </p>
-        <div id="vis_div" style="height: 400px; width: 600px;"></div>
-    </div>    
+        <div id="vis_div" class="chartsize"></div>
 </div>
 {% endblock %}
