@@ -279,7 +279,7 @@ def predict_result(request, pk):
         2) prediction_results.html template is rendered
     """
 
-    json_file_path = os.path.join(BASE_DIR, 'test_dict_data2.json')
+    json_file_path = os.path.join(BASE_DIR, 'scored_results_1.json')
     dict_data = {}
     domain_list = []
 
@@ -385,7 +385,7 @@ def predict_result(request, pk):
     #     json.dump(dict_data, temp)
 
     return render(request, './Venter/prediction_result.html', {
-        'domain_list': domain_list, 'dict_data': json.dumps(dict_data)
+        'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'filemeta': filemeta
     })
 
 
@@ -621,7 +621,7 @@ def wordcloud(request, pk):
         return render(request, './Venter/wordcloud.html', {'category_list': category_list, 'filemeta': filemeta})
 
 @login_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET","POST"])
 def visualization_dashboard(request, pk):
     filemeta = File.objects.get(pk=pk)
 
@@ -631,7 +631,7 @@ def visualization_dashboard(request, pk):
     elif str(request.user.profile.organisation_name) == 'CIVIS':
         output_file_path = filemeta.output_file_xlsx.path
 
-    if request.method == 'GET':
+    if request.method == "POST":
         json_file_path = os.path.join(BASE_DIR, 'scored_results.json')
         dict_data = {}
         domain_list = []
@@ -688,5 +688,6 @@ def visualization_dashboard(request, pk):
                         column.insert(2, 0)
                 domain_stats.append(column)
             dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
-
-        return render(request, './Venter/visualization_dashboard.html', {'filemeta': filemeta, 'domain_list': domain_list, 'dict_data': json.dumps(dict_data)})
+            domain_name = request.POST['input_domain_name']
+            
+    return render(request, './Venter/visualization_dashboard.html', {'filemeta': filemeta, 'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'domain_name': domain_name})

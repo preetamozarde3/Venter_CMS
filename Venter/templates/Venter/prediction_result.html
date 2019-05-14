@@ -191,6 +191,13 @@
       chart.draw(data, options);
       $("#chart-download-container").show();
     };
+
+    // visualization function to take the domain
+    function visualization() {
+      var domain_name = $('.nav-tabs .active > a').attr('href');
+      document.getElementById('input_domain_name').value = domain_name;
+      document.getElementById('vis_form').submit();
+    }
   </script>
   
   <div class="outer-pr row">
@@ -293,6 +300,11 @@
   
       <div id="graph" class="tab-pane fade content-graph">
         <div id="chart-download-container">
+            <form method="post" id="vis_form" action="{% url 'visualization_dashboard' filemeta.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="input_domain_name" name="input_domain_name" value=""/>
+                    <button type="button" class="btn btn-primary" onclick="visualization();">Visualize</button>
+            </form>
             <button type="button" class="btn btn-primary download_graph-btn" id="download_graph-btn">
                 Download graph &nbsp;<i class="fa fa-download download-fa" aria-hidden="true"></i>
             </button>

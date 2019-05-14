@@ -1,7 +1,10 @@
-{% extends 'Venter/base.html' %}
-{% block title %}Prediction Table {% endblock %}
-{% block content %}
+
+<!DOCTYPE html>
+<html>
 <link rel="stylesheet" href="../../static/assets/css/visualization_dashboard.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script type="text/javascript"
     src="https://www.gstatic.com/charts/loader.js"></script>
   <script type="text/javascript">
@@ -12,9 +15,11 @@
     var chartEditor = null;
 
     function loadEditor() {
-
+      var domain_name = '{{ domain_name }}';
+      console.log("222222222222222222222222")
+      console.log(domain_name)
       var main_dict = jQuery.parseJSON('{{dict_data|escapejs}}');
-      var stats = main_dict['Traffic']['Statistics'];
+      var stats = main_dict[domain_name]['Statistics'];
       stats = jQuery.parseJSON(stats);
       console.log(stats);
       console.log(typeof(stats));
@@ -26,10 +31,10 @@
          'dataTable':data,
          'options': {'title':'test', 
                       width: '1100',
-                      height: '600',
+                      height: '1600',
                       isStacked: true,
                       legend: {
-                        position: 'none'
+                        position: 'right'
                       },
                     }
       });
@@ -45,10 +50,13 @@
     }
 
   </script>
+<body>
 <div class="outer-vd">
         <p> Try Me...
             <input type="submit" name="loadcharteditor" id="loadcharteditor" value="Edit me!" onclick="loadEditor()" style="font-size:18px;">
         </p>
+        <a href="{% url 'predict_result' filemeta.pk %}" class="btn btn-default" style="float:right;">back</a>
         <div id="vis_div" class="chartsize"></div>
 </div>
-{% endblock %}
+</body>
+</html>
