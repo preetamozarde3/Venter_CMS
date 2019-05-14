@@ -1,7 +1,49 @@
 {% extends 'Venter/base.html' %}
 {% block title %}Prediction Table {% endblock %}
 {% block content %}
+<link rel="stylesheet" href="../../static/assets/css/visualization_dashboard.css">
+<script type="text/javascript"
+    src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', {packages: ['charteditor']});
+  </script>
+  <script type="text/javascript">
+    google.charts.setOnLoadCallback(loadEditor);
+    var chartEditor = null;
 
-<h1>Visualization dashboard</h1>
+    function loadEditor() {
 
+      var main_dict = jQuery.parseJSON('{{dict_data|escapejs}}');
+      var stats = main_dict['Traffic']['Statistics'];
+      stats = jQuery.parseJSON(stats);
+      console.log(stats);
+      console.log(typeof(stats));
+
+    var data = new google.visualization.arrayToDataTable(stats);
+      // Create the chart to edit.
+      var wrapper = new google.visualization.ChartWrapper({
+         'chartType':'LineChart',
+         'dataTable':data,
+         'options': {'title':'test'}
+      });
+
+      chartEditor = new google.visualization.ChartEditor();
+      google.visualization.events.addListener(chartEditor, 'ok', redrawChart);
+      chartEditor.openDialog(wrapper, {});
+    }
+
+    // On "OK" save the chart to a <div> on the page.
+    function redrawChart(){
+      chartEditor.getChartWrapper().draw(document.getElementById('vis_div'));
+    }
+
+  </script>
+<div class="outer-vd">
+    <div class="inner-vd">
+        <p> Try Me...
+            <input type="submit" name="loadcharteditor" id="loadcharteditor" value="Edit me!" onclick="loadEditor()" style="font-size:18px;">
+        </p>
+        <div id="vis_div" style="height: 400px; width: 600px;"></div>
+    </div>    
+</div>
 {% endblock %}

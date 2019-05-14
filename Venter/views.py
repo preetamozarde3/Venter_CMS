@@ -632,4 +632,61 @@ def visualization_dashboard(request, pk):
         output_file_path = filemeta.output_file_xlsx.path
 
     if request.method == 'GET':
-        return render(request, './Venter/visualization_dashboard.html', {'filemeta': filemeta})
+        json_file_path = os.path.join(BASE_DIR, 'scored_results.json')
+        dict_data = {}
+        domain_list = []
+
+        with open(json_file_path) as json_file:
+            dict_data = json.load(json_file)
+
+        filemeta = File.objects.get(pk=pk)
+        output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+
+        if not os.path.exists(output_directory_path):
+            os.makedirs(output_directory_path)
+
+        temp1 = filemeta.filename
+        temp2 = os.path.splitext(temp1)
+        custom_input_file_name = temp2[0]
+        
+        output_json_file_name = 'results__'+custom_input_file_name+'.json'
+        output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
+
+        output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
+        output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
+
+        filemeta.output_file_json = output_file_path_json
+        filemeta.output_file_xlsx = output_file_path_xlsx
+        filemeta.save()
+
+        #################################################
+
+        dict_keys = dict_data.keys()
+        domain_list = list(dict_keys)
+        domain_data = {}
+
+        for domain_name in domain_list:
+            domain_data = dict_data[domain_name]
+            temp = ['Category']
+            index = 0
+            for subCat in domain_data['Novel']:
+                temp.append('Sub category ' + str(index+1))
+                index += 1
+            temp.append({'role': 'style'})
+            domain_stats = []
+            domain_stats.append(temp)
+
+            for category, responselist in domain_data.items():
+                column = [category, len(responselist), '']
+                if category == 'Novel':
+                    column = ['Novel']
+                    for subCat in domain_data[category]:
+                        column.append(len(domain_data[category][subCat]))
+                    column.append('')
+                else:
+                    for i in range(len(domain_stats[0]) - len(column)):
+                        column.insert(2, 0)
+                domain_stats.append(column)
+            dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
+
+        return render(request, './Venter/visualization_dashboard.html', {'filemeta': filemeta, 'domain_list': domain_list, 'dict_data': json.dumps(dict_data)})
