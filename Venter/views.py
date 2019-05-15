@@ -624,13 +624,6 @@ def wordcloud(request, pk):
 @require_http_methods(["GET","POST"])
 def visualization_dashboard(request, pk):
     filemeta = File.objects.get(pk=pk)
-
-    if str(request.user.profile.organisation_name) == 'ICMC':
-        # none
-        pass
-    elif str(request.user.profile.organisation_name) == 'CIVIS':
-        output_file_path = filemeta.output_file_xlsx.path
-
     if request.method == "POST":
         json_file_path = os.path.join(BASE_DIR, 'scored_results.json')
         dict_data = {}

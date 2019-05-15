@@ -1,6 +1,10 @@
 /*
 Styling for visualization_dashboard.html
 */
+.modal-dialog.google-visualization-charteditor-dialog {
+    left: 300px !important; 
+}
+
 .outer-vd{
     background-color: whitesmoke;
     height: 100vh;
@@ -12,10 +16,3 @@ div.sidebar-wrapper li.wordcloud-item{
     display: block;
 }
   
-.chartsize {
-    width: 2000px;
-    height: 700px;
-    overflow-x: scroll;
-    overflow-y: scroll;
-    background-color: white;
-}
