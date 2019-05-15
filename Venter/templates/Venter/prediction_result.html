@@ -300,7 +300,7 @@
   
       <div id="graph" class="tab-pane fade content-graph">
         <div id="chart-download-container">
-            <form method="post" id="vis_form" action="{% url 'visualization_dashboard' filemeta.pk %}">
+            <form method="post" id="vis_form" class="vis-btn" action="{% url 'visualization_dashboard' filemeta.pk %}">
                     {% csrf_token %}
                     <input type="hidden" id="input_domain_name" name="input_domain_name" value=""/>
                     <button type="button" class="btn btn-primary" onclick="visualization();">Visualize</button>
