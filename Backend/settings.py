@@ -28,7 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    'venter-msr.herokuapp.com'
+    'venter-msr.herokuapp.com',
+    '13.93.192.77'
 ]
 
 # Application definition

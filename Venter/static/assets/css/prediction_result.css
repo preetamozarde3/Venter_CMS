@@ -20,13 +20,13 @@ Styling for prediction_result.html
 }
 
 .content-cardview{
-    width: 80vw;
+    width: 1197px;
     height: 75vh;
     background-color: white;
 }
 
 .content-graph{
-    width: 1150px;
+    width: 1197px;
     height: 75vh;
     background-color: white;
 }
@@ -110,13 +110,13 @@ Styling for prediction_result.html
 }
 
 .card-container{
-    width: 80vw;
+    width: 1197px;
     height: 75vh;
     overflow-x: scroll;
 }
 
 .graph-container{
-    width: 1150px;
+    width: 1197px;
     height: 70vh;
     overflow-x: scroll;
     overflow-y: scroll;
