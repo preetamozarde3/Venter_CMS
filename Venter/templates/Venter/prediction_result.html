@@ -5,6 +5,8 @@
 <link rel="stylesheet" href="../../static/assets/css/prediction_result.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <link src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
+<link src="https://code.jquery.com/jquery-3.2.1.js">
+<link src="https://code.jquery.com/jquery-3.2.1.min.js">
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript" src="../../static/assets/js/download.js"></script>
 
@@ -191,6 +193,7 @@
       chart.draw(data, options);
       $("#chart-download-container").show();
     };
+
     function cardview(domain_name){
       // $("#graph").hide();
       $("#cardview").tab('show');
@@ -278,59 +281,69 @@
             <script>
               $('#pill-cardview').click(function(event){
                 var domain_name = $('.nav-tabs .active > a').attr('href');
-                '{{ domain|get_domain:'+domain_name+' }}';
-                // '{% with domain="Power" %}';
-                '{% with domain_data=dict_data|get_domain_data:domain %}';
+                var cardview_data;
+                console.log("Domain Name", domain_name);
+                $.ajax({
+                  url: '{% url "predict_result" filemeta.pk %}',
+                  type: 'GET',
+                  data: {'domain_name': domain_name},
+                  dataType: 'json',
+                  success: function (resp) {
+                    console.log(typeof(resp.cardview_data))
+                    console.log(resp)
+                    cardview_data = resp
+                    console.log(cardview_data)
+                  },
+                  error:function(err){
+                    alert("Cardview not found: "+err.status+" "+err.statusText);
+                  }
+                });
                 $("#cardview").tab('show');
               });
             </script>
-            {% for category,response in domain_data.items %}
-              {% if category == 'Statistics' %}
-                <!--continue-->
-              {% else %}  
-                <div class="card" id="{{category}}">
-                  <div class="card-header">
+            {% for category,response in cardview_data.items %}
+            {% if category == 'Statistics' %}
+            <!--continue-->
+            {% else %}
+            <div class="card" id="{{category}}">
+                <div class="card-header">
                     <label class="label-category">{{category}}</label>
                     <hr>
-                  </div>
-                  <div class="card-body">
+                </div>
+                <div class="card-body">
                     <div class="card-text">
-                      {% if not response %}
-                          <li class="list-group-item">No response</li>
-                      {% else %}
+                        {% if not response %}
+                        <li class="list-group-item">No response</li>
+                        {% else %}
                         {% if category == 'Novel' %}
                         <ul class="list-group no_response_list">
                             {% for keys, item in response.items %}
-                                <li class="list-group-item">
-                                  <b>Sub category {{forloop.counter}}</b>
-                                </li>
-                                {% for r in item %}
-                                    <li class="list-group-item">
-                                      {{r}}
-                                    </li>
-                                {% endfor %}
+                            <li class="list-group-item">
+                                <b>Sub category {{forloop.counter}}</b>
+                            </li>
+                            {% for r in item %}
+                            <li class="list-group-item">
+                                {{r}}
+                            </li>
                             {% endfor %}
-                        </ul>    
+                            {% endfor %}
+                        </ul>
                         {% else %}
                         <ul class="list-group response_list">
                             {% for r in response %}
-                                <li class="list-group-item">
-                                    {{r.response}}
-                                    <span class="response_score">{{r.score}}%</span>
-                                </li> <br>
+                            <li class="list-group-item">
+                                {{r.response}}
+                                <span class="response_score">{{r.score}}%</span>
+                            </li> <br>
                             {% endfor %}
-                        </ul>    
+                        </ul>
                         {% endif %}
-                      {% endif %}
+                        {% endif %}
                     </div>
-                  </div>
                 </div>
-              {% endif %}  
+            </div>
+            {% endif %}
             {% endfor %}
-            <script>
-              '{% endwith %}';
-              // '{% endwith %}';
-            </script>  
         </div>
       </div>
   

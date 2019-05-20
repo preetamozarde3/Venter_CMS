@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.mail import mail_admins
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.cache import never_cache
@@ -263,9 +263,10 @@ class FileListView(LoginRequiredMixin, ListView):
             result = [file_obj for file_obj in result if query in file_obj.filename.lower()]
         return result
 
+dict_data = {}
 
 @login_required
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def predict_result(request, pk):
     """
     View logic for running CIVIS Prediction Model on files uploaded by CIVIS users.
@@ -280,8 +281,8 @@ def predict_result(request, pk):
     """
 
     json_file_path = os.path.join(BASE_DIR, 'scored_results_1.json')
-    dict_data = {}
     domain_list = []
+    global dict_data
 
     with open(json_file_path) as json_file:
         dict_data = json.load(json_file)
@@ -384,10 +385,20 @@ def predict_result(request, pk):
     # with open('test_dict_data1.json', 'w') as temp:
     #     json.dump(dict_data, temp)
 
+    if request.is_ajax():
+        domain = request.GET.get('domain_name')
+        cardview_data = dict_data[domain]
+        print("******************************Domain: ", domain)
+        return JsonResponse({'cardview_data': cardview_data}, content_type="application/json")
+
     return render(request, './Venter/prediction_result.html', {
-        'domain_list': domain_list, 'dict_data': json.dumps(dict_data)
+        'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'filemeta': filemeta
     })
 
+# @login_required
+# @require_http_methods(["GET"])
+# def ajax_request(request):
+#     return render(request, './Venter/domain_data.html', {'cardview_data':cardview_data})
 
 @login_required
 @require_http_methods(["GET", "POST"])

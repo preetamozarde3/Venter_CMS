@@ -29,6 +29,10 @@ urlpatterns = [
     path('contact_us/', views.contact_us, name='contact_us'),
     # ex: /venter/predict_result/5/
     path('predict_result/<int:pk>', views.predict_result, name='predict_result'),
+
+    # ex: /venter/predict_result/ajax_domain_request/
+#     path('predict_result/cardview', views.ajax_request, name='ajax_request'),
+
     # ex: /venter/predict_csv/5/
     path('predict_csv/<int:pk>', views.predict_csv, name='predict_csv'),
     # ex: /venter/download_table/5/
