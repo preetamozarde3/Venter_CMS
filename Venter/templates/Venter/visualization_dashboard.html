@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="../../static/assets/fonts/linearicons/style.css">
 
 <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
-<!-- <link href="../../static/assets/css/bootstrap.min.css" rel="stylesheet" /> -->
+<!-- <link href="../../static/assets/css/bootstrap.min.css" rel="stylesheet" > -->
 <link href="../../static/assets/css/light-bootstrap-dashboard.css?v=2.0.1" rel="stylesheet" />
 
 
@@ -61,79 +61,76 @@
 
   </script>
 <body>
-<div class="sidebar" data-image="../../static/assets/img/sidebar-2.jpg" data-color="blue">
-  <div class="sidebar-wrapper">
-      <div class="logo-nav">
-              <img src="../../static/assets/img/logo_4.png" alt="logo" class="imagelogo-base">
-      </div>
+    <div class="sidebar" src="../../static/assets/img/sidebar-2.jpg" data-color="blue">
+        <div class="sidebar-wrapper">
+            <div class="logo-nav">
+                    <img src="../../static/assets/img/logo_4.png" alt="logo" class="imagelogo-base">
+            </div>
 
-      <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav">
 
-          <li class="dashboard-item">
-              <a class="nav-link" href="{% url 'dashboard' %}">
-                  <i class="nc-icon nc-grid-45"></i>
-                  <p>Dashboard</p>
-              </a>
-          </li>
-          {% if user.is_staff %}
-          <li class="register-employee-item">
-              <a class="nav-link" href="{% url 'register_employee' %}">
-                  <i class="nc-icon nc-notes"></i>
-                  <p>Register Employee</p>
-              </a>
-          </li>
-          {% endif %}
+                <li class="dashboard-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">
+                        <i class="nc-icon nc-grid-45"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                {% if user.is_staff %}
+                <li class="register-employee-item">
+                    <a class="nav-link" href="{% url 'register_employee' %}">
+                        <i class="nc-icon nc-notes"></i>
+                        <p>Register Employee</p>
+                    </a>
+                </li>
+                {% endif %}
 
-          <li class="upload-file-item">
-              <a class="nav-link" href="{% url 'upload_file' %}">
-                  <i class="nc-icon nc-simple-add"></i>
-                  <p>Upload File</p>
-              </a>
-          </li>
+                <li class="upload-file-item">
+                    <a class="nav-link" href="{% url 'upload_file' %}">
+                        <i class="nc-icon nc-simple-add"></i>
+                        <p>Upload File</p>
+                    </a>
+                </li>
 
-          <li class="user-profile-item">
-              <a class="nav-link" href="{% url 'update_profile' request.user.pk %}">
-                  <i class="nc-icon nc-circle-09"></i>
-                  <p>User Profile</p>
-              </a>
-          </li>
+                <li class="user-profile-item">
+                    <a class="nav-link" href="{% url 'update_profile' request.user.pk %}">
+                        <i class="nc-icon nc-circle-09"></i>
+                        <p>User Profile</p>
+                    </a>
+                </li>
 
-          {% if request.user.profile.organisation_name|stringformat:"s" != "CIVIS" %}
-          <li class="category-list-item">
-              <a class="nav-link" href="{% url 'category_list' %}">
-                  <i class="nc-icon nc-bullet-list-67"></i>
-                  <p>Category List</p>
-              </a>
-          </li>
-          
-          <li class="wordcloud-item">
-              <a class="nav-link" href="">
-                  <i class="nc-icon nc-chat-round"></i>
-                  <p>Word Cloud</p>
-              </a>
-          </li>   
+                {% if request.user.profile.organisation_name|stringformat:"s" != "CIVIS" %}
+                <li class="category-list-item">
+                    <a class="nav-link" href="{% url 'category_list' %}">
+                        <i class="nc-icon nc-bullet-list-67"></i>
+                        <p>Category List</p>
+                    </a>
+                </li>
+                
+                <li class="wordcloud-item">
+                    <a class="nav-link" href="">
+                        <i class="nc-icon nc-chat-round"></i>
+                        <p>Word Cloud</p>
+                    </a>
+                </li>   
 
-          {% endif %}
+                {% endif %}
 
-          <li class="logout-list-item">
-              <a class="nav-link" href="{% url 'logout' %}">
-                  <i class="nc-icon nc-button-power"></i>
-                  <p>Log out</p>
-              </a>
-          </li>
-      </ul>
-  </div>
-</div>
-<div class="main-panel">
-    <p> Try Me...
-        <input type="submit" name="loadcharteditor" id="loadcharteditor" value="Edit me!" onclick="loadEditor()" style="font-size:18px;">
-    </p>
-    <div id="vis_div" class="chartsize"></div>
-    <a href="{% url 'predict_result' filemeta.pk %}" class="btn btn-default" style="float:right;background-color: green;color: white;">back</a>
+                <li class="logout-list-item">
+                    <a class="nav-link" href="{% url 'logout' %}">
+                        <i class="nc-icon nc-button-power"></i>
+                        <p>Log out</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="main-panel">
+        <p> Try Me...
+            <input type="submit" name="loadcharteditor" id="loadcharteditor" value="Edit me!" onclick="loadEditor()" style="font-size:18px;">
+        </p>
+        <div id="vis_div" class="chartsize"></div>
+        <a href="{% url 'predict_result' filemeta.pk %}" class="btn btn-default" style="float:right;background-color: green;color: white;">back</a>
 
-</div> 
-
-        
-</div>
+    </div>  
 </body>
 </html>
