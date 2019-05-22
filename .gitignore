@@ -1,7 +1,7 @@
 .vscode/
 .idea/*
 __pycache__/
-db.sqlite3
+# db.sqlite3
 # media/**
 htmlcov/
 stats.txt
