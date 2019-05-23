@@ -1,4 +1,51 @@
-{% block title %}Domain Data{% endblock %}
+<script>
+    $(".response_list").each(function () {
+        $(this).children().each(function () {
+            let list_index = $(this);
+            let span_text = $(this).children().text();
+            span_text = span_text.slice(0, -1);
+            let score = parseInt(span_text);
+            colorcode(score, list_index);
+        })
+    })
+    function colorcode(score, li_index) {
+        if (score > 90) {
+            li_index.attr("style", "background-color: rgb(0,255,0) !important");
+        }
+        else if (score > 80) {
+            li_index.attr("style", "background-color: rgb(15,255,0) !important");
+        }
+        else if (score > 70) {
+            li_index.attr("style", "background-color: rgb(75,255,0) !important");
+        }
+        else if (score > 60) {
+            li_index.attr("style", "background-color: rgb(135,255,0) !important");
+        }
+        else if (score > 50) {
+            li_index.attr("style", "background-color: rgb(195,255,0) !important");
+        }
+        else if (score > 40) {
+            li_index.attr("style", "background-color: rgb(255,255,0) !important");
+        }
+        else if (score > 30) {
+            li_index.attr("style", "background-color: rgb(255,240,0) !important");
+        }
+        else if (score > 20) {
+            li_index.attr("style", "background-color: rgb(255,180,0) !important");
+        }
+        else if (score > 10) {
+            li_index.attr("style", "background-color: rgb(255,120,0) !important");
+        }
+        else {
+            li_index.attr("style", "background-color: rgb(255,60,0) !important");
+        }
+    }
+</script>
+<script>
+    console.log('{{category}}');
+    document.getElementById('{{category}}').scrollIntoView();
+</script>
+ 
 {% block content %}
 {% for category,response in cardview_data.items %}
 {% if category == 'Statistics' %}

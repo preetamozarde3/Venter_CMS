@@ -39,54 +39,27 @@
       // });
 
       $('#pill-graph').click(function(event){
+        console.log("pill-graph");
         var domain_name = $('.nav-tabs .active > a').attr('href');
-        $("#graph").tab('show');
+        $(".content-graph").show();
+        $("#cardview").hide();
         drawStuff(domain_name);
       });
+      
+      $('.nav.nav-tabs.nav-fill').click(function(event){
+        console.log("navclick");
+        var domain_name = $('.nav-tabs .active > a').attr('href');
+        $("#graph").show();
+        $("#cardview").hide();
+        drawStuff(domain_name);
+        });
+
+        $('#pill-cardview').click(function(event){
+        console.log("pill-graph");
+        $("#cardview").tab('show');
+        });
 
       $("#chart-download-container").hide();
-   
-      $(".response_list").each(function(){
-        $(this).children().each(function(){
-           let list_index = $(this);
-           let span_text = $(this).children().text();
-           span_text = span_text.slice(0,-1);
-           let score = parseInt(span_text);
-           colorcode(score, list_index);
-        })          
-      })
-      function colorcode(score, li_index){
-        if(score > 90){
-          li_index.attr("style", "background-color: rgb(0,255,0) !important");
-        }
-        else if(score > 80){
-          li_index.attr("style", "background-color: rgb(15,255,0) !important");
-        }
-        else if(score > 70){
-          li_index.attr("style", "background-color: rgb(75,255,0) !important");
-        }
-        else if(score > 60){
-          li_index.attr("style", "background-color: rgb(135,255,0) !important");
-        }
-        else if(score > 50){
-          li_index.attr("style", "background-color: rgb(195,255,0) !important");
-        }
-        else if(score > 40){
-         li_index.attr("style", "background-color: rgb(255,255,0) !important");
-        }
-        else if(score > 30){
-          li_index.attr("style", "background-color: rgb(255,240,0) !important");
-        }
-        else if(score > 20){
-          li_index.attr("style", "background-color: rgb(255,180,0) !important");
-        }
-        else if(score > 10){
-          li_index.attr("style", "background-color: rgb(255,120,0) !important");
-        }
-        else{
-          li_index.attr("style", "background-color: rgb(255,60,0) !important");
-        }
-      }
   });
   </script>
   
@@ -175,14 +148,33 @@
       var chart = new google.visualization.ColumnChart(chart_div);
      
       function selectHandler() {
-            var selectedItem = chart.getSelection()[0];
-            if (selectedItem) {
-              var category = data.getValue(selectedItem.row, 0);
-              $('#graph').hide();
-              $('#cardview').tab('show');
-              document.getElementById(category).scrollIntoView();
-            } 
-          }
+        
+        var selectedItem = chart.getSelection()[0];
+        if (selectedItem) {
+          var domain_name = $('.nav-tabs .active > a').attr('href');
+          var category = data.getValue(selectedItem.row, 0);
+          $("#cardview").tab('show');
+          console.log("selecthandler-cvshow");
+          $("#cardview").show();
+          console.log("selecthandler-cvshowmodified");
+          $(".content-graph").hide();
+          $('.nav-pills > li.active').find("a").attr("style", "background-color: rgb(255,255,255) !important; color: rgb(0,0,0) !important");
+          $('.nav-pills li').removeClass('active');
+          $("#pill-cardview").addClass('active');
+          $("#pill-cardview").find("a").attr("style", "background-color: rgb(0,0,255) !important; color: rgb(255,255,255) !important");
+          $.ajax({
+            url: '{% url "predict_result" filemeta.pk %}',
+            type: 'GET',
+            data: { 'domain_name': domain_name, 'category': category },
+            success: function (resp) {
+              $("#test_cardview").html(resp);
+            },
+            error: function (err) {
+              alert("Cardview not found: " + err.status + " " + err.statusText);
+            }
+          });
+        }
+      }
       google.visualization.events.addListener(chart, 'select', selectHandler);    
       google.visualization.events.addListener(chart, 'ready', function () {
           var imgUri = chart.getImageURI();
@@ -287,63 +279,21 @@
                   url: '{% url "predict_result" filemeta.pk %}',
                   type: 'GET',
                   data: {'domain_name': domain_name},
-                  dataType: 'json',
                   success: function (resp) {
-                    console.log(typeof(resp.cardview_data))
-                    console.log(resp)
-                    cardview_data = resp
-                    console.log(cardview_data)
+                    $("#test_cardview").html(resp);
                   },
                   error:function(err){
                     alert("Cardview not found: "+err.status+" "+err.statusText);
                   }
                 });
-                $("#cardview").tab('show');
+                
+                $("#cardview").show();
+                $(".content-graph").hide();
               });
             </script>
-            {% for category,response in cardview_data.items %}
-            {% if category == 'Statistics' %}
-            <!--continue-->
-            {% else %}
-            <div class="card" id="{{category}}">
-                <div class="card-header">
-                    <label class="label-category">{{category}}</label>
-                    <hr>
-                </div>
-                <div class="card-body">
-                    <div class="card-text">
-                        {% if not response %}
-                        <li class="list-group-item">No response</li>
-                        {% else %}
-                        {% if category == 'Novel' %}
-                        <ul class="list-group no_response_list">
-                            {% for keys, item in response.items %}
-                            <li class="list-group-item">
-                                <b>Sub category {{forloop.counter}}</b>
-                            </li>
-                            {% for r in item %}
-                            <li class="list-group-item">
-                                {{r}}
-                            </li>
-                            {% endfor %}
-                            {% endfor %}
-                        </ul>
-                        {% else %}
-                        <ul class="list-group response_list">
-                            {% for r in response %}
-                            <li class="list-group-item">
-                                {{r.response}}
-                                <span class="response_score">{{r.score}}%</span>
-                            </li> <br>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
+            <div id="test_cardview">
+
             </div>
-            {% endif %}
-            {% endfor %}
         </div>
       </div>
   

@@ -1,4 +1,5 @@
 import datetime
+import array
 import json
 import os
 import re
@@ -263,8 +264,6 @@ class FileListView(LoginRequiredMixin, ListView):
             result = [file_obj for file_obj in result if query in file_obj.filename.lower()]
         return result
 
-dict_data = {}
-
 @login_required
 @require_http_methods(["GET", "POST"])
 def predict_result(request, pk):
@@ -280,79 +279,79 @@ def predict_result(request, pk):
         2) prediction_results.html template is rendered
     """
 
-    json_file_path = os.path.join(BASE_DIR, 'scored_results_1.json')
-    domain_list = []
-    global dict_data
+    # json_file_path = os.path.join(BASE_DIR, 'scored_results_1.json')
+    # domain_list = []
+    # dict_data = {}
 
-    with open(json_file_path) as json_file:
-        dict_data = json.load(json_file)
-
-    filemeta = File.objects.get(pk=pk)
-    output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
-
-    if not os.path.exists(output_directory_path):
-        os.makedirs(output_directory_path)
-
-    temp1 = filemeta.filename
-    temp2 = os.path.splitext(temp1)
-    custom_input_file_name = temp2[0]
-    
-    output_json_file_name = 'results__'+custom_input_file_name+'.json'
-    output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
-
-    output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
-    output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
-
-    filemeta.output_file_json = output_file_path_json
-    filemeta.output_file_xlsx = output_file_path_xlsx
-    filemeta.save()
+    # with open(json_file_path) as json_file:
+    #     dict_data = json.load(json_file)
 
     # filemeta = File.objects.get(pk=pk)
-    # if not filemeta.has_prediction:
-    #     output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+    # output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
 
-    #     if not os.path.exists(output_directory_path):
-    #         os.makedirs(output_directory_path)
+    # if not os.path.exists(output_directory_path):
+    #     os.makedirs(output_directory_path)
 
-    #     temp1 = filemeta.filename
-    #     temp2 = os.path.splitext(temp1)
-    #     custom_input_file_name = temp2[0]
+    # temp1 = filemeta.filename
+    # temp2 = os.path.splitext(temp1)
+    # custom_input_file_name = temp2[0]
+    
+    # output_json_file_name = 'results__'+custom_input_file_name+'.json'
+    # output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
+
+    # output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
+    # output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
+
+    # filemeta.output_file_json = output_file_path_json
+    # filemeta.output_file_xlsx = output_file_path_xlsx
+    # filemeta.save()
+
+    filemeta = File.objects.get(pk=pk)
+    if not filemeta.has_prediction:
+        output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+
+        if not os.path.exists(output_directory_path):
+            os.makedirs(output_directory_path)
+
+        temp1 = filemeta.filename
+        temp2 = os.path.splitext(temp1)
+        custom_input_file_name = temp2[0]
         
-    #     output_json_file_name = 'results__'+custom_input_file_name+'.json'
-    #     output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
+        output_json_file_name = 'results__'+custom_input_file_name+'.json'
+        output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
  
-    #     output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
-    #     output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
+        output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
+        output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
 
-    #     dict_data = {}
-    #     domain_list = []
+        dict_data = {}
+        domain_list = []
 
-    #     sm = SimilarityMapping(filemeta.input_file.path)
-    #     dict_data = sm.driver()
+        sm = SimilarityMapping(filemeta.input_file.path)
+        dict_data = sm.driver()
 
-    #     if dict_data:
-    #         filemeta.has_prediction = True
+        if dict_data:
+            filemeta.has_prediction = True
 
-    #     with open(output_file_path_json, 'w') as temp:
-    #         json.dump(dict_data, temp)
+        with open(output_file_path_json, 'w') as temp:
+            json.dump(dict_data, temp)
 
-    #     print('JSON output saved.')
-    #     print('Done.')
+        print('JSON output saved.')
+        print('Done.')
 
-    #     filemeta.output_file_json = output_file_path_json
+        filemeta.output_file_json = output_file_path_json
 
-    #     download_output = pd.ExcelWriter(output_file_path_xlsx, engine='xlsxwriter')
+        download_output = pd.ExcelWriter(output_file_path_xlsx, engine='xlsxwriter')
 
-    #     for domain in dict_data:
-    #         print('Writing Excel for domain %s' % domain)
-    #         df = pd.DataFrame({key:pd.Series(value) for key, value in dict_data[domain].items()})
-    #         df.to_excel(download_output, sheet_name=domain)
-    #     download_output.save()
+        for domain in dict_data:
+            print('Writing Excel for domain %s' % domain)
+            df = pd.DataFrame({key:pd.Series(value) for key, value in dict_data[domain].items()})
+            df.to_excel(download_output, sheet_name=domain)
+        download_output.save()
 
-    #     filemeta.output_file_xlsx = output_file_path_xlsx
-    #     filemeta.save()
-    # else:
-    #     dict_data = json.load(filemeta.output_file_json)
+        filemeta.output_file_xlsx = output_file_path_xlsx
+        filemeta.save()
+    else:
+        dict_data = json.load(filemeta.output_file_json)
 
     dict_keys = dict_data.keys()
     domain_list = list(dict_keys)
@@ -370,6 +369,7 @@ def predict_result(request, pk):
         domain_stats.append(temp)
 
         for category, responselist in domain_data.items():
+            category = category.split('\n')[0]
             column = [category, len(responselist), '']
             if category == 'Novel':
                 column = ['Novel']
@@ -388,17 +388,24 @@ def predict_result(request, pk):
     if request.is_ajax():
         domain = request.GET.get('domain_name')
         cardview_data = dict_data[domain]
-        print("******************************Domain: ", domain)
-        return JsonResponse({'cardview_data': cardview_data}, content_type="application/json")
+        # intIndex = 1
+        # index = cardview_data.startIndex.advancedBy(intIndex)
+            
+        if 'category' in request.GET:
+            category = request.GET.get('category')
+            print(type(category))
+        else:
+            for key, val in cardview_data.items():
+                category = key
+                break
+        print("******************************Category: ", category)
+        # print("******************************Domain: ", domain)
+        # print("******************************Cardview: ", cardview_data)
+        return render(request, './Venter/domain_data.html', {'cardview_data':cardview_data, 'category': category})
 
     return render(request, './Venter/prediction_result.html', {
         'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'filemeta': filemeta
     })
-
-# @login_required
-# @require_http_methods(["GET"])
-# def ajax_request(request):
-#     return render(request, './Venter/domain_data.html', {'cardview_data':cardview_data})
 
 @login_required
 @require_http_methods(["GET", "POST"])
