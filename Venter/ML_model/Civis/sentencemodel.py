@@ -111,7 +111,7 @@ def categorizer():
         rows = len(responses)
 
         temp = open(os.path.join(categoryPath, categoryDomain), 'r', encoding='utf-8-sig')
-        categories = temp.readlines()
+        categories = temp.readlines()       
         temp_categories = []
         for line in categories:
             temp_categories.append(line.split('\n')[0])
