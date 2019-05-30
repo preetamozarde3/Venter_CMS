@@ -1,6 +1,5 @@
 from . import csvparser, sentencemodel
 
-
 class SimilarityMapping:
     '''
     This class consumes the model and sequences the flow of execution for the given input

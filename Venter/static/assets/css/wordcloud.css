@@ -33,4 +33,8 @@ div.sidebar-wrapper li.wordcloud-item{
     border: 1px solid darkslategray;
 }
 
-
+#label_domain_name{
+    color: blue;
+    font-weight: bolder;
+    font-size: x-large;
+}

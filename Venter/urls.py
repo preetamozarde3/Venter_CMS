@@ -35,6 +35,8 @@ urlpatterns = [
     path('download_table/<int:pk>', views.download_table, name='download_table'),
     # ex: /venter/wordcloud/5/
     path('wordcloud/<int:pk>', views.wordcloud, name='wordcloud'),
+    # ex: /venter/wordcloud_contents/5/
+    path('wordcloud_contents/<int:pk>', views.wordcloud_contents, name='wordcloud_contents'),
     # ex: /venter/visualization_dashboard/5/
     path('visualization_dashboard/<int:pk>', views.visualization_dashboard, name='visualization_dashboard'),
     # ex: password_reset/

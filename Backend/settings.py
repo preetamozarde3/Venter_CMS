@@ -29,7 +29,6 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'venter-msr.herokuapp.com',
-    '13.93.192.77'
 ]
 
 # Application definition
@@ -138,6 +137,8 @@ LOGIN_REDIRECT_URL = 'upload_file'
 LOGIN_URL = 'login'
 
 LOGOUT_REDIRECT_URL = 'login'
+
+# FIXTURE_DIRS = os.path.join(BASE_DIR, 'Venter/fixtures')
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

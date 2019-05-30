@@ -111,6 +111,10 @@ def categorizer():
 
         temp = open(os.path.join(categoryPath, categoryDomain), 'r', encoding='utf-8-sig')
         categories = temp.readlines()
+        temp_categories = []
+        for line in categories:
+            temp_categories.append(line.split('\n')[0])
+        categories = temp_categories
         columns = len(categories)
         categories.append('Novel')
 

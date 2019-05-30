@@ -1,0 +1,93 @@
+<script>
+    $(".response_list").each(function () {
+        $(this).children().each(function () {
+            let list_index = $(this);
+            let span_text = $(this).children().text();
+            span_text = span_text.slice(0, -1);
+            let score = parseInt(span_text);
+            colorcode(score, list_index);
+        })
+    })
+    function colorcode(score, li_index) {
+        if (score > 90) {
+            li_index.attr("style", "background-color: rgb(0,255,0) !important");
+        }
+        else if (score > 80) {
+            li_index.attr("style", "background-color: rgb(15,255,0) !important");
+        }
+        else if (score > 70) {
+            li_index.attr("style", "background-color: rgb(75,255,0) !important");
+        }
+        else if (score > 60) {
+            li_index.attr("style", "background-color: rgb(135,255,0) !important");
+        }
+        else if (score > 50) {
+            li_index.attr("style", "background-color: rgb(195,255,0) !important");
+        }
+        else if (score > 40) {
+            li_index.attr("style", "background-color: rgb(255,255,0) !important");
+        }
+        else if (score > 30) {
+            li_index.attr("style", "background-color: rgb(255,240,0) !important");
+        }
+        else if (score > 20) {
+            li_index.attr("style", "background-color: rgb(255,180,0) !important");
+        }
+        else if (score > 10) {
+            li_index.attr("style", "background-color: rgb(255,120,0) !important");
+        }
+        else {
+            li_index.attr("style", "background-color: rgb(255,60,0) !important");
+        }
+    }
+</script>
+<script>
+    console.log('{{category}}');
+    document.getElementById('{{category}}').scrollIntoView();
+</script>
+ 
+{% block content %}
+{% for category,response in cardview_data.items %}
+{% if category == 'Statistics' %}
+<!--continue-->
+{% else %}
+<div class="card" id="{{category}}">
+    <div class="card-header">
+        <label class="label-category">{{category}}</label>
+        <hr>
+    </div>
+    <div class="card-body">
+        <div class="card-text">
+            {% if not response %}
+            <li class="list-group-item">No response</li>
+            {% else %}
+            {% if category == 'Novel' %}
+            <ul class="list-group no_response_list">
+                {% for keys, item in response.items %}
+                <li class="list-group-item">
+                    <b>Sub category {{forloop.counter}}</b>
+                </li>
+                {% for r in item %}
+                <li class="list-group-item">
+                    {{r}}
+                </li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+            {% else %}
+            <ul class="list-group response_list">
+                {% for r in response %}
+                <li class="list-group-item">
+                    {{r.response}}
+                    <span class="response_score">{{r.score}}%</span>
+                </li> <br>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

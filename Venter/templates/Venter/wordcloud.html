@@ -204,26 +204,72 @@
                     animate();
                 }
             })();
-    }        
+    }     
+
+    $(document).ready(function () {
+        var domain_name = '{{domain_name}}';
+        document.getElementById('label_domain_name').innerHTML = domain_name;
+
+        '{% if category_name %}'
+            document.getElementById('label_category_name').style.display = 'block';
+            document.getElementById('label_category').style.display = 'block';
+            document.getElementById('label_category_name').innerHTML = '{{category_name}}';
+        '{% else %}'
+            document.getElementById('label_category_name').style.display = 'none';
+            document.getElementById('label_category').style.display = 'none';
+        '{% endif %}'
+
+
+        $(".wordcloud-btn").click(function(event){
+        var category_name = $('#category_dropdown').val();
+        let category_list = []
+        $("#category_dropdown option").each(function(){
+            if ($(this).val() == '0')
+            {
+                //pass;
+            }
+            else
+            {
+                let temp = $(this).text();
+                let cat = temp.replace(/^\s+|\s+$/g, "");
+                category_list.push(cat);
+            }
+        })
+        document.getElementById('category_list').value = JSON.stringify(category_list);
+        document.getElementById('category_name').value = category_name;
+
+        var domain = document.getElementById('label_domain_name').innerHTML;
+        document.getElementById('domain_name').value = domain;
+        document.getElementById('category_form').submit();
+        });   
+    });
 
 </script>
-
-
 
 <div class="outer-wc">
     <div class="inner-wc">
         <div class="category-container">
-            <form method="post" id="category_form" action="{% url 'wordcloud' filemeta.pk %}">
+            <form method="post" id="category_form" action="{% url 'wordcloud_contents' filemeta.pk %}">
                 {% csrf_token %}
-                <select id="category">
+                <label style="color: black; font-weight: bolder; font-size: x-large;" id="label_domain_name">Domain</label>
+                <br>
+                <label style="color: black; font-weight: bolder; font-size: large;" id="label_category">Category Selected: </label>&nbsp;&nbsp;
+                <label style="color: black; font-weight: bold; font-size: medium;" id="label_category_name">Category</label>
+                <br>
+                <select id="category_dropdown">
                     <option value="0">---select category---</option>
                     {% for item in category_list %}
                         <option value='{{ item }}' >{{ item }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="btn btn-danger wordcloud-btn">Generate wordcloud &nbsp;<i class="fa fa-cloud cloud-fa" aria-hidden="true"></i>
+                <input type="hidden" id="category_name" name="category_name" value=""/>
+                <input type="hidden" id="domain_name" name="domain_name" value=""/>
+                <input type="hidden" id="category_list" name="category_list" value=""/>
+                <button type="button" class="btn btn-danger wordcloud-btn">
+                    Generate wordcloud &nbsp;<i class="fa fa-cloud cloud-fa" aria-hidden="true"></i>
                 </button>
-            </form>   
+            </form>
+            <a href="{% url 'predict_result' filemeta.pk %}"><button class="btn btn-success">Back</button></a>
         </div>
         <br>
         <div class="wordcloud-container" id="word-cloud"></div>

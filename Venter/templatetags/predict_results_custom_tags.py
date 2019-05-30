@@ -12,4 +12,3 @@ def get_domain_data(dictionary, key):
 @register.filter
 def get_domain(value, domain):
     return value.replace(value, domain)
-    

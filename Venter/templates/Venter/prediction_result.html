@@ -5,6 +5,8 @@
 <link rel="stylesheet" href="../../static/assets/css/prediction_result.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <link src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
+<link src="https://code.jquery.com/jquery-3.2.1.js">
+<link src="https://code.jquery.com/jquery-3.2.1.min.js">
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript" src="../../static/assets/js/download.js"></script>
 
@@ -27,53 +29,27 @@
       });
 
       $('#pill-graph').click(function(event){
+        console.log("pill-graph");
         var domain_name = $('.nav-tabs .active > a').attr('href');
+        $(".content-graph").show();
+        $("#cardview").hide();
         drawStuff(domain_name);
       });
+      
+      $('.nav.nav-tabs.nav-fill').click(function(event){
+        console.log("navclick");
+        var domain_name = $('.nav-tabs .active > a').attr('href');
+        $("#graph").show();
+        $("#cardview").hide();
+        drawStuff(domain_name);
+        });
 
-      $("#chart-download-container").hide();
-   
-      $(".response_list").each(function(){
-        $(this).children().each(function(){
-           let list_index = $(this);
-           let span_text = $(this).children().text();
-           span_text = span_text.slice(0,-1);
-           let score = parseInt(span_text);
-           colorcode(score, list_index);
-        })          
-      })
-      function colorcode(score, li_index){
-        if(score > 90){
-          li_index.attr("style", "background-color: rgb(0,255,0) !important");
-        }
-        else if(score > 80){
-          li_index.attr("style", "background-color: rgb(15,255,0) !important");
-        }
-        else if(score > 70){
-          li_index.attr("style", "background-color: rgb(75,255,0) !important");
-        }
-        else if(score > 60){
-          li_index.attr("style", "background-color: rgb(135,255,0) !important");
-        }
-        else if(score > 50){
-          li_index.attr("style", "background-color: rgb(195,255,0) !important");
-        }
-        else if(score > 40){
-         li_index.attr("style", "background-color: rgb(255,255,0) !important");
-        }
-        else if(score > 30){
-          li_index.attr("style", "background-color: rgb(255,240,0) !important");
-        }
-        else if(score > 20){
-          li_index.attr("style", "background-color: rgb(255,180,0) !important");
-        }
-        else if(score > 10){
-          li_index.attr("style", "background-color: rgb(255,120,0) !important");
-        }
-        else{
-          li_index.attr("style", "background-color: rgb(255,60,0) !important");
-        }
-      }
+        $('#pill-cardview').click(function(event){
+        console.log("pill-graph");
+        $("#cardview").tab('show');
+        });
+
+      $("#toolbar-container").hide();
   });
   </script>
   
@@ -162,29 +138,59 @@
       var chart = new google.visualization.ColumnChart(chart_div);
      
       function selectHandler() {
-            var selectedItem = chart.getSelection()[0];
-            if (selectedItem) {
-              var category = data.getValue(selectedItem.row, 0);
-              $('#cardview').tab('show');
-              $('.nav-pills > li.active').find("a").attr("style", "background-color: rgb(255,255,255) !important; color: rgb(0,0,0) !important");
-              $('.nav-pills li').removeClass('active');
-              $("#pill-cardview").addClass('active');
-              $("#pill-cardview").find("a").attr("style", "background-color: rgb(0,0,255) !important; color: rgb(255,255,255) !important");
-              document.getElementById(category).scrollIntoView();
-            } 
-          }
+        
+        var selectedItem = chart.getSelection()[0];
+        if (selectedItem) {
+          var domain_name = $('.nav-tabs .active > a').attr('href');
+          var category = data.getValue(selectedItem.row, 0);
+          $("#cardview").tab('show');
+          console.log("selecthandler-cvshow");
+          $("#cardview").show();
+          console.log("selecthandler-cvshowmodified");
+          $(".content-graph").hide();
+          $('.nav-pills > li.active').find("a").attr("style", "background-color: rgb(255,255,255) !important; color: rgb(0,0,0) !important");
+          $('.nav-pills li').removeClass('active');
+          $("#pill-cardview").addClass('active');
+          $("#pill-cardview").find("a").attr("style", "background-color: rgb(0,0,255) !important; color: rgb(255,255,255) !important");
+          $.ajax({
+            url: '{% url "predict_result" filemeta.pk %}',
+            type: 'GET',
+            data: { 'domain_name': domain_name, 'category': category },
+            success: function (resp) {
+              $("#test_cardview").html(resp);
+            },
+            error: function (err) {
+              alert("Cardview not found: " + err.status + " " + err.statusText);
+            }
+          });
+        }
+      }
       google.visualization.events.addListener(chart, 'select', selectHandler);    
       google.visualization.events.addListener(chart, 'ready', function () {
           var imgUri = chart.getImageURI();
+          var image_name = domain_name.concat(".png");
           $('#download_graph-btn').click(function() {
-            download(imgUri, "chart.png", "image/png");
+            download(imgUri, image_name, "image/png");
           });
       });
       chart.draw(data, options);
-      $("#chart-download-container").show();
+      $("#toolbar-container").show();
     };
+    
+    // visualization function to take the domain
+    function visualization() {
+      var domain_name = $('.nav-tabs .active > a').attr('href');
+      document.getElementById('input_domain_name').value = domain_name;
+      document.getElementById('vis_form').submit();
+    }
+
+    //wordcloud function to take the domain
+    function wordcloud() {
+      var domain_name = $('.nav-tabs .active > a').attr('href');
+      document.getElementById('wordcloud_domain_name').value = domain_name;
+      document.getElementById('wordcloud_form').submit();
+    }
   </script>
-  
   
   <div class="outer-pr row">
     <div class="content-domain">
@@ -229,65 +235,56 @@
               $('#pill-cardview').click(function(event){
                 $('cardview').tab('show');
                 var domain_name = $('.nav-tabs .active > a').attr('href');
-                '{% with domain=domain|get_domain:"Power" %}';
-                '{% with domain_data=dict_data|get_domain_data:domain %}';
+                var cardview_data;
+                console.log("Domain Name", domain_name);
+                $.ajax({
+                  url: '{% url "predict_result" filemeta.pk %}',
+                  type: 'GET',
+                  data: {'domain_name': domain_name},
+                  success: function (resp) {
+                    $("#test_cardview").html(resp);
+                  },
+                  error:function(err){
+                    alert("Cardview not found: "+err.status+" "+err.statusText);
+                  }
+                });
+                
+                $("#cardview").show();
+                $(".content-graph").hide();
               });
             </script>
-            {% for category,response in domain_data.items %}
-              {% if category == 'Statistics' %}
-                <!--continue-->
-              {% else %}  
-                <div class="card" id="{{category}}">
-                  <div class="card-header">
-                    <label class="label-category">{{category}}</label>
-                    <hr>
-                  </div>
-                  <div class="card-body">
-                    <div class="card-text">
-                      {% if not response %}
-                          <li class="list-group-item">No response</li>
-                      {% else %}
-                        {% if category == 'Novel' %}
-                        <ul class="list-group no_response_list">
-                            {% for keys, item in response.items %}
-                                <li class="list-group-item">
-                                  <b>Sub category {{forloop.counter}}</b>
-                                </li>
-                                {% for r in item %}
-                                    <li class="list-group-item">
-                                      {{r}}
-                                    </li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>    
-                        {% else %}
-                        <ul class="list-group response_list">
-                            {% for r in response %}
-                                <li class="list-group-item">
-                                    {{r.response}}
-                                    <span class="response_score">{{r.score}}%</span>
-                                </li> <br>
-                            {% endfor %}
-                        </ul>    
-                        {% endif %}
-                      {% endif %}
-                    </div>
-                  </div>
-                </div>
-              {% endif %}  
-            {% endfor %}
-            <script>
-              '{% endwith %}';
-              '{% endwith %}';
-            </script>  
+            <div id="test_cardview">
+
+            </div>
         </div>
       </div>
   
       <div id="graph" class="tab-pane fade content-graph">
-        <div id="chart-download-container">
+        <div id="toolbar-container">
+          <div class="row">
+            <div class="col-sm-5">
+              <form method="post" id="vis_form" class="vis-form" action="{% url 'visualization_dashboard' filemeta.pk %}">
+                {% csrf_token %}
+                <input type="hidden" id="input_domain_name" name="input_domain_name" value=""/>
+                <button type="button" class="btn btn-primary" onclick="visualization();">
+                  Visualize&nbsp;<i class="nc-icon nc-app download-fa" aria-hidden="true"></i>
+                </button>
+              </form>
+            </div>
+            <div class="col-sm-5">
+              <form method="post" id="wordcloud_form" class="wordcloud-form" action="{% url 'wordcloud' filemeta.pk %}">
+                {% csrf_token %}
+                <input type="hidden" id="wordcloud_domain_name" name="wordcloud_domain_name" value=""/>
+                <button type="button" class="btn btn-primary" onclick="wordcloud();">
+                  Wordcloud&nbsp;<i class="nc-icon nc-chat-round download-fa" aria-hidden="true"></i>
+                </button>
+              </form>
+            </div>  
+          </div>  
             <button type="button" class="btn btn-primary download_graph-btn" id="download_graph-btn">
                 Download graph &nbsp;<i class="fa fa-download download-fa" aria-hidden="true"></i>
             </button>
+            
         </div>  
         <div id="chart_div" class="graph-container"></div>
       </div>
