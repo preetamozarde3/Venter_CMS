@@ -125,8 +125,8 @@
         </div>
     </div>
     <div class="main-panel">
-        <p> Try Me...
-            <input type="submit" name="loadcharteditor" id="loadcharteditor" value="Edit me!" onclick="loadEditor()" style="font-size:18px;">
+        <p>
+            <input type="submit" name="loadcharteditor" id="loadcharteditor" class="btn btn-primary" value="Edit" onclick="loadEditor()" style="font-size:18px;">
         </p>
         <div id="vis_div" class="chartsize"></div>
         <a href="{% url 'predict_result' filemeta.pk %}" class="btn btn-default back-btn">Back</a>

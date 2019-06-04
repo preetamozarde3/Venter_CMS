@@ -26,7 +26,8 @@ from Backend.settings import ADMINS, BASE_DIR, MEDIA_ROOT
 from Venter.forms import ContactForm, CSVForm, ExcelForm, ProfileForm, UserForm
 from Venter.models import Category, File, Profile
 from .ML_model.ICMC.model.ClassificationService import ClassificationService
-from Venter import tasks
+# from Venter import tasks
+from .ML_model.Civis.modeldriver import SimilarityMapping
 
 
 @login_required
@@ -278,80 +279,83 @@ def predict_result(request, pk):
         2) prediction_results.html template is rendered
     """
 
-    json_file_path = os.path.join(BASE_DIR, 'scored_results_1.json')
-    domain_list = []
-    dict_data = {}
+    # json_file_path = os.path.join(BASE_DIR, 'scored_results_1.json')
+    # domain_list = []
+    # dict_data = {}
 
-    with open(json_file_path) as json_file:
-        dict_data = json.load(json_file)
-
-    filemeta = File.objects.get(pk=pk)
-    output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
-
-    if not os.path.exists(output_directory_path):
-        os.makedirs(output_directory_path)
-
-    temp1 = filemeta.filename
-    temp2 = os.path.splitext(temp1)
-    custom_input_file_name = temp2[0]
-    
-    output_json_file_name = 'results__'+custom_input_file_name+'.json'
-    output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
-
-    output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
-    output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
-
-    filemeta.output_file_json = output_file_path_json
-    filemeta.output_file_xlsx = output_file_path_xlsx
-    filemeta.save()
+    # with open(json_file_path) as json_file:
+    #     dict_data = json.load(json_file)
 
     # filemeta = File.objects.get(pk=pk)
-    # if not filemeta.has_prediction:
-    #     output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+    # output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
 
-    #     if not os.path.exists(output_directory_path):
-    #         os.makedirs(output_directory_path)
+    # if not os.path.exists(output_directory_path):
+    #     os.makedirs(output_directory_path)
 
-    #     temp1 = filemeta.filename
-    #     temp2 = os.path.splitext(temp1)
-    #     custom_input_file_name = temp2[0]
+    # temp1 = filemeta.filename
+    # temp2 = os.path.splitext(temp1)
+    # custom_input_file_name = temp2[0]
+    
+    # output_json_file_name = 'results__'+custom_input_file_name+'.json'
+    # output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
+
+    # output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
+    # output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
+
+    # filemeta.output_file_json = output_file_path_json
+    # filemeta.output_file_xlsx = output_file_path_xlsx
+    # filemeta.save()
+
+    filemeta = File.objects.get(pk=pk)
+    if not filemeta.has_prediction:
+        output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+
+        if not os.path.exists(output_directory_path):
+            os.makedirs(output_directory_path)
+
+        temp1 = filemeta.filename
+        temp2 = os.path.splitext(temp1)
+        custom_input_file_name = temp2[0]
         
-    #     output_json_file_name = 'results__'+custom_input_file_name+'.json'
-    #     output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
+        output_json_file_name = 'results__'+custom_input_file_name+'.json'
+        output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
  
-    #     output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
-    #     output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
+        output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
+        output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
 
-    #     dict_data = {}
-    #     domain_list = []
+        dict_data = {}
+        domain_list = []
 
-    #     prediction_result = tasks.predict_runner.delay(filemeta.input_file.path)
+        # prediction_result = tasks.predict_runner.delay(filemeta.input_file.path)
 
-    #     dict_data = prediction_result.get()
+        # dict_data = prediction_result.get()
 
-    #     if dict_data:
-    #         filemeta.has_prediction = True
+        sm = SimilarityMapping(filemeta.input_file.path)
+        dict_data = sm.driver()
 
-    #     with open(output_file_path_json, 'w') as temp:
-    #         json.dump(dict_data, temp)
+        if dict_data:
+            filemeta.has_prediction = True
 
-    #     print('JSON output saved.')
-    #     print('Done.')
+        with open(output_file_path_json, 'w') as temp:
+            json.dump(dict_data, temp)
 
-    #     filemeta.output_file_json = output_file_path_json
+        print('JSON output saved.')
+        print('Done.')
 
-    #     download_output = pd.ExcelWriter(output_file_path_xlsx, engine='xlsxwriter')
+        filemeta.output_file_json = output_file_path_json
 
-    #     for domain in dict_data:
-    #         print('Writing Excel for domain %s' % domain)
-    #         df = pd.DataFrame({key:pd.Series(value) for key, value in dict_data[domain].items()})
-    #         df.to_excel(download_output, sheet_name=domain)
-    #     download_output.save()
+        download_output = pd.ExcelWriter(output_file_path_xlsx, engine='xlsxwriter')
 
-    #     filemeta.output_file_xlsx = output_file_path_xlsx
-    #     filemeta.save()
-    # else:
-    #     dict_data = json.load(filemeta.output_file_json)
+        for domain in dict_data:
+            print('Writing Excel for domain %s' % domain)
+            df = pd.DataFrame({key:pd.Series(value) for key, value in dict_data[domain].items()})
+            df.to_excel(download_output, sheet_name=domain)
+        download_output.save()
+
+        filemeta.output_file_xlsx = output_file_path_xlsx
+        filemeta.save()
+    else:
+        dict_data = json.load(filemeta.output_file_json)
 
     dict_keys = dict_data.keys()
     domain_list = list(dict_keys)
@@ -589,11 +593,32 @@ def download_table(request, pk):
 @login_required
 @require_http_methods(["GET", "POST"])
 def wordcloud(request, pk):
+    """
+    View logic to display wordcloud for category selected frmo dropdown list(wordcloud template)
+        1) The categories for a particular domain are populated in the dropdown widget (in wordcloud template)
+    """
     filemeta = File.objects.get(pk=pk)
 
     if request.method == 'POST':
         wordcloud_category_list = []
         if str(request.user.profile.organisation_name) == 'ICMC':
+            pass
+        elif str(request.user.profile.organisation_name) == 'CIVIS':
+            domain_name = request.POST['wordcloud_domain_name']
+
+            with open('wordcloud_output_data.json') as json_file:
+                output_dict = json.load(json_file)
+    
+            domain_items_list = output_dict[domain_name]
+            for domain_item in domain_items_list:
+                for category, category_wordcloud_dict in domain_item.items():
+                    wordcloud_category_list.append(category)
+                    
+        return render(request, './Venter/wordcloud.html', {'category_list': wordcloud_category_list, 'filemeta': filemeta, 'domain_name': domain_name})
+    else:
+        wordcloud_category_list = []
+        if str(request.user.profile.organisation_name) == 'ICMC':
+            print("organisation icmc")
             output_file_path = filemeta.output_file_xlsx.path
             output_file = pd.read_csv(output_file_path, sep=',', header=0)
             
@@ -628,40 +653,72 @@ def wordcloud(request, pk):
 
             category_queryset = Category.objects.filter(organisation_name='ICMC').values_list('category', flat=True)
             wordcloud_category_list = list(category_queryset)
-        elif str(request.user.profile.organisation_name) == 'CIVIS':
-            domain_name = request.POST['wordcloud_domain_name']
-
-            with open('wordcloud_output_data.json') as json_file:
-                output_dict = json.load(json_file)
-    
-            domain_items_list = output_dict[domain_name]
-            for domain_item in domain_items_list:
-                for category, category_wordcloud_dict in domain_item.items():
-                    wordcloud_category_list.append(category)
-                    
-        return render(request, './Venter/wordcloud.html', {'category_list': wordcloud_category_list, 'filemeta': filemeta, 'domain_name': domain_name})
-    else:
         return render(request, './Venter/wordcloud.html', {'category_list': wordcloud_category_list, 'filemeta': filemeta})
 
 @login_required
 @require_http_methods(["POST"])
 def wordcloud_contents(request, pk):
+    """
+        View logic to display wordcloud for a set of responses belonging to a particular category
+        1) For the category selected, the input json file is feed into the wordcloud algorithm
+        2) The output dict 'words' is passed as a context variable to the wordcloud template
+    """
     filemeta = File.objects.get(pk=pk)
-    category_name = request.POST['category_name']
-    domain_name = request.POST['domain_name']
-    print("=================domain_name in wordcloud_contents: ", domain_name)
-    wordcloud_category_list = json.loads(request.POST['category_list'])
+    if str(request.user.profile.organisation_name) == 'ICMC':
+        wordcloud_category_list = []
+        print("====================ICMC inside wordcloud contents------------")
+        output_file_path = filemeta.output_file_xlsx.path
+        output_file = pd.read_csv(output_file_path, sep=',', header=0)
+        
+        temp_dict = defaultdict(list)
+        
+        for predicted_category_str, complaint_description in zip(output_file['Predicted_Category'], output_file['complaint_description']):
+            predicted_category_list = literal_eval(predicted_category_str)
+            if predicted_category_list:
+                final_cat = predicted_category_list[0]
+                final_cat = re.split(r"\(", final_cat)[0]
+                final_cat = final_cat.strip(' ')
 
-    with open('wordcloud_output_data.json') as json_file:
-                output_dict = json.load(json_file)
+                if final_cat not in temp_dict:
+                    response_list = []
+                    response_list.append(complaint_description)
+                    temp_dict[final_cat] = response_list
+                else:
+                    response_list = []
+                    response_list.append(complaint_description)
+                    temp_dict[final_cat].append(complaint_description)
+            else:
+                pass
+        wordcloud_input_dict = dict(temp_dict)
+        print("writing to json file")
+        with open('wordcloud_input_data.json', 'w') as fp:
+            json.dump(wordcloud_input_dict, fp)
 
-    domain_items_list = output_dict[domain_name]
-    words = {}
+        keys = ["garbage", "recreation park", "dumpster on road", "traffic near K.G road", "plant trees on pavement", "road conditions", "water pond"]
+        values = [10, 90, 30, 20, 54, 45, 100]
+        words = {}
+        words = dict(zip(keys, values))
 
-    for domain_item in domain_items_list:
-        if list(domain_item.keys())[0].split('\n')[0].strip() == category_name.strip():
-            words = list(domain_item.values())[0]
-    return render(request, './Venter/wordcloud.html', {'category_list': wordcloud_category_list, 'filemeta': filemeta, 'words': words, 'domain_name': domain_name, 'category_name': category_name})
+        category_queryset = Category.objects.filter(organisation_name='ICMC').values_list('category', flat=True)
+        wordcloud_category_list = list(category_queryset)
+        return render(request, './Venter/wordcloud.html', {'category_list': wordcloud_category_list, 'filemeta': filemeta, 'words': words})
+    elif str(request.user.profile.organisation_name) == 'CIVIS':
+        category_name = request.POST['category_name']
+        domain_name = request.POST['domain_name']
+        print("=================domain_name in wordcloud_contents: ", domain_name)
+        wordcloud_category_list = json.loads(request.POST['category_list'])
+
+        with open('wordcloud_output_data.json') as json_file:
+                    output_dict = json.load(json_file)
+
+        domain_items_list = output_dict[domain_name]
+        words = {}
+
+        for domain_item in domain_items_list:
+            if list(domain_item.keys())[0].split('\n')[0].strip() == category_name.strip():
+                words = list(domain_item.values())[0]
+        print("==========================category_name: ", category_name)
+        return render(request, './Venter/wordcloud.html', {'category_list': wordcloud_category_list, 'filemeta': filemeta, 'words': words, 'domain_name': domain_name, 'category_name': category_name})
 
 
 @login_required

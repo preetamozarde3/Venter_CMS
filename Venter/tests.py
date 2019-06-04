@@ -109,33 +109,92 @@ class UploadFileTestCase(TestCase):
     def setUp(self):
         self.client = Client()
 
+    # def test_upload_invalid_file_civis(self):
+    #     self.client.login(username='admin.civis', password="pass@1234")
+    #     response = self.client.get(reverse('upload_file'))
+    #     self.assertEqual(response.status_code, 200)
+    #     invalid_data = {
+    #         "input_file": "ICMC/admin.icmc/2019-05-28/input/15_rows_icmc.csv"
+    #     }
+    #     factory = RequestFactory()
+    #     request = factory.post('upload_file', invalid_data, enctype='multipart/form-data')
+    #     form = ExcelForm(data=invalid_data, request=request)
+    #     self.assertFalse(form.is_valid())
+    #     self.assertTrue(form.errors)
+
+    # def test_upload_invalid_file_icmc(self):
+    #     self.client.login(username='admin.icmc', password="pass@1234")
+    #     response = self.client.get(reverse('upload_file'))
+    #     self.assertEqual(response.status_code, 200)
+    #     invalid_data = {
+    #         "input_file": "CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx"
+    #     }
+    #     factory = RequestFactory()
+    #     request = factory.post('upload_file', invalid_data, enctype='multipart/form-data')
+    #     form = CSVForm(data=invalid_data, request=request)
+    #     self.assertFalse(form.is_valid())
+    #     self.assertTrue(form.errors)
+
+    # def test_upload_valid_file_civis(self):
+    #     self.client.login(username='admin.civis', password="pass@1234")
+    #     response = self.client.get(reverse('upload_file'))
+    #     self.assertEqual(response.status_code, 200)
+    #     data = open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'rb')
+    #     file_to_upload = SimpleUploadedFile('responses_1.xlsx', open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'r'), content_type="xlsx")
+    #     valid_data = {
+    #         "input_file": file_to_upload
+    #     }
+    #     factory = RequestFactory()
+
+    #     request = factory.post('upload_file', valid_data, enctype='multipart/form-data')
+    #     form = ExcelForm(data=valid_data, request=request)
+    #     self.assertTrue(form.is_valid())
+    #     self.assertFalse(form.errors)
+
     def test_upload_invalid_file_civis(self):
-        self.client.login(username='user1.civis', password="pass@1234")
+        self.client.login(username='admin.civis', password="pass@1234")
         response = self.client.get(reverse('upload_file'))
         self.assertEqual(response.status_code, 200)
+        data = open(os.path.join(MEDIA_ROOT, 'ICMC/admin.icmc/2019-05-28/input/15_rows_icmc.csv'), 'rb')
+        file_to_upload = SimpleUploadedFile(content=data.read(), name=data.name, content_type='multipart/form-data')
         invalid_data = {
-            "input_file": "ICMC/admin.icmc/2019-05-28/input/15_rows_icmc.csv"
+            "input_file": file_to_upload
         }
         factory = RequestFactory()
+
         request = factory.post('upload_file', invalid_data, enctype='multipart/form-data')
         form = ExcelForm(data=invalid_data, request=request)
         self.assertFalse(form.is_valid())
         self.assertTrue(form.errors)
 
-    def test_upload_valid_file_civis(self):
-        self.client.login(username='admin.civis', password="pass@1234")
-        response = self.client.get(reverse('upload_file'))
-        self.assertEqual(response.status_code, 200)
-        # data = open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'rb')
-        file_to_upload = SimpleUploadedFile('responses_1.xlsx', open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'r'), content_type="xlsx")
-        valid_data = {
-            "input_file": file_to_upload
-        }
-        factory = RequestFactory()
+    # def test_upload_valid_file_civis(self):
+    #     self.client.login(username='admin.civis', password="pass@1234")
+    #     response = self.client.get(reverse('upload_file'))
+    #     self.assertEqual(response.status_code, 200)
+    #     data = open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'rb')
+    #     file_to_upload = SimpleUploadedFile(content = data.read(), name = data.name, content_type='multipart/form-data')
+    #     valid_data = {
+    #         "input_file": file_to_upload
+    #     }
+    #     factory = RequestFactory()
 
-        request = factory.post('upload_file', valid_data, enctype='multipart/form-data')
-        form = ExcelForm(data=valid_data, request=request)
-        self.assertTrue(form.is_valid())
-        self.assertFalse(form.errors)
-        # response = Client.post(reverse('upload_file'), valid_data, format='multipart/form-data')
-        # self.assertEqual(response.status_code, 200)_
+    #     request = factory.post('upload_file', valid_data, enctype='multipart/form-data')
+    #     form = ExcelForm(data=valid_data, request=request)
+    #     self.assertTrue(form.is_valid())
+    #     self.assertFalse(form.errors)
+
+    # def test_upload_valid_file_civis(self):
+    #     self.client.login(username='admin.civis', password="pass@1234")
+    #     response = self.client.get(reverse('upload_file'))
+    #     self.assertEqual(response.status_code, 200)
+    #     data = open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'rb')
+    #     file_to_upload = SimpleUploadedFile(content = data.read(), name = data.name, content_type='multipart/form-data')
+    #     valid_data = {
+    #         "input_file": file_to_upload
+    #     }
+    #     factory = RequestFactory()
+
+    #     request = factory.post('upload_file', valid_data, enctype='multipart/form-data')
+    #     form = ExcelForm(data=valid_data, request=request)
+    #     self.assertTrue(form.is_valid())
+    #     self.assertFalse(form.errors)

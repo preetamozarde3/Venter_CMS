@@ -145,7 +145,7 @@ Styling for prediction_result.html
     font-size: 20px;
 }
 
-.toolbar-container{
+#toolbar-container{
     position: relative;
 }
 
@@ -154,17 +154,6 @@ Styling for prediction_result.html
     margin-top: 2%;
     margin-right: 2%;
 }
-
-/* .vis-form {
-    float: left;
-    margin-top: 2%;
-    margin-left: 2%;
-}
-
-.wordcloud-form{
-    margin-top: 2%;
-    display: inline-block;
-} */
 
 .response_score{
     background-color: #0906a5;

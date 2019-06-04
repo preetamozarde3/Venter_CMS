@@ -1,5 +1,5 @@
 {% extends 'Venter/base.html' %}
-{% block title %}Upload File {% endblock %}
+{% block title %}Word Cloud {% endblock %}
 {% block content %}
 
 <!-- LINEARICONS -->
@@ -51,10 +51,13 @@
             }
 
             var words = []
-
+            '{% if words %}'
+                console.log('words dict exists');
+                console.log('{{words}}');
+            '{% endif %}'
             '{% for i,j in words.items %}'
                 var weight = parseInt('{{j}}');
-                words.push({"freq": weight, "word": '{{i}}'});
+                words.push({"freq": weight+10, "word": '{{i}}'});
             '{% endfor %}'
 
 
@@ -207,40 +210,43 @@
     }     
 
     $(document).ready(function () {
-        var domain_name = '{{domain_name}}';
-        document.getElementById('label_domain_name').innerHTML = domain_name;
+        '{% if filemeta.uploaded_by.organisation_name|stringformat:"s" == "CIVIS" %}'
+            var domain_name = '{{domain_name}}';
+            document.getElementById('label_domain_name').innerHTML = domain_name;
 
-        '{% if category_name %}'
-            document.getElementById('label_category_name').style.display = 'block';
-            document.getElementById('label_category').style.display = 'block';
-            document.getElementById('label_category_name').innerHTML = '{{category_name}}';
-        '{% else %}'
-            document.getElementById('label_category_name').style.display = 'none';
-            document.getElementById('label_category').style.display = 'none';
+            '{% if category_name %}';
+                var category_name = '{{category_name|escapejs}}';
+                document.getElementById('label_category_name').style.visibility = 'visible';
+                document.getElementById('label_category').style.visibility = 'visible';
+                document.getElementById('label_category_name').innerHTML = category_name;
+            '{% endif %}';
         '{% endif %}'
 
-
         $(".wordcloud-btn").click(function(event){
-        var category_name = $('#category_dropdown').val();
-        let category_list = []
-        $("#category_dropdown option").each(function(){
-            if ($(this).val() == '0')
-            {
-                //pass;
-            }
-            else
-            {
-                let temp = $(this).text();
-                let cat = temp.replace(/^\s+|\s+$/g, "");
-                category_list.push(cat);
-            }
-        })
-        document.getElementById('category_list').value = JSON.stringify(category_list);
-        document.getElementById('category_name').value = category_name;
+            '{% if filemeta.uploaded_by.organisation_name|stringformat:"s" == "CIVIS" %}'
+                    var category_name = $('#category_dropdown').val();
+                    let category_list = []
+                    $("#category_dropdown option").each(function(){
+                        if ($(this).val() == '0')
+                        {
+                            //pass;
+                        }
+                        else
+                        {
+                            let temp = $(this).text();
+                            let cat = temp.replace(/^\s+|\s+$/g, "");
+                            category_list.push(cat);
+                        }
+                    })
+                    document.getElementById('category_list').value = JSON.stringify(category_list);
+                    document.getElementById('category_name').value = category_name;
 
-        var domain = document.getElementById('label_domain_name').innerHTML;
-        document.getElementById('domain_name').value = domain;
-        document.getElementById('category_form').submit();
+                    var domain = document.getElementById('label_domain_name').innerHTML;
+                    document.getElementById('domain_name').value = domain;
+                    document.getElementById('category_form').submit();
+            '{% elif filemeta.uploaded_by.organisation_name|stringformat:"s" == "ICMC" %}'
+                    document.getElementById('category_form').submit();
+            '{% endif %}'    
         });   
     });
 
@@ -251,10 +257,10 @@
         <div class="category-container">
             <form method="post" id="category_form" action="{% url 'wordcloud_contents' filemeta.pk %}">
                 {% csrf_token %}
-                <label style="color: black; font-weight: bolder; font-size: x-large;" id="label_domain_name">Domain</label>
+                <label id="label_domain_name">Domain</label>
                 <br>
-                <label style="color: black; font-weight: bolder; font-size: large;" id="label_category">Category Selected: </label>&nbsp;&nbsp;
-                <label style="color: black; font-weight: bold; font-size: medium;" id="label_category_name">Category</label>
+                <label id="label_category">Category Selected: </label>&nbsp;&nbsp;
+                <label id="label_category_name">Category</label>
                 <br>
                 <select id="category_dropdown">
                     <option value="0">---select category---</option>
@@ -269,7 +275,7 @@
                     Generate wordcloud &nbsp;<i class="fa fa-cloud cloud-fa" aria-hidden="true"></i>
                 </button>
             </form>
-            <a href="{% url 'predict_result' filemeta.pk %}"><button class="btn btn-success">Back</button></a>
+            <a href="{% url 'predict_result' filemeta.pk %}"><button class="btn btn-success">Back</button></a>  
         </div>
         <br>
         <div class="wordcloud-container" id="word-cloud"></div>

@@ -261,8 +261,10 @@
   
       <div id="graph" class="tab-pane fade content-graph">
         <div id="toolbar-container">
-          <div class="row">
-            <div class="col-sm-5">
+
+          <div class="row toolbar-row">
+
+            <div class="col-sm-3">
               <form method="post" id="vis_form" class="vis-form" action="{% url 'visualization_dashboard' filemeta.pk %}">
                 {% csrf_token %}
                 <input type="hidden" id="input_domain_name" name="input_domain_name" value=""/>
@@ -271,6 +273,7 @@
                 </button>
               </form>
             </div>
+
             <div class="col-sm-5">
               <form method="post" id="wordcloud_form" class="wordcloud-form" action="{% url 'wordcloud' filemeta.pk %}">
                 {% csrf_token %}
@@ -279,12 +282,15 @@
                   Wordcloud&nbsp;<i class="nc-icon nc-chat-round download-fa" aria-hidden="true"></i>
                 </button>
               </form>
+            </div> 
+
+            <div class="col-sm-2">
+              <button type="button" class="btn btn-primary download_graph-btn" id="download_graph-btn">
+                  Download graph &nbsp;<i class="fa fa-download download-fa" aria-hidden="true"></i>
+              </button>
             </div>  
+
           </div>  
-            <button type="button" class="btn btn-primary download_graph-btn" id="download_graph-btn">
-                Download graph &nbsp;<i class="fa fa-download download-fa" aria-hidden="true"></i>
-            </button>
-            
         </div>  
         <div id="chart_div" class="graph-container"></div>
       </div>

@@ -142,8 +142,8 @@ class File(models.Model):
     file_saved_status = models.BooleanField(
         default=False,
     )
-    output_file_json = models.FileField(blank=True)
-    output_file_xlsx = models.FileField(blank=True)
+    output_file_json = models.FileField(blank=True, max_length=255)
+    output_file_xlsx = models.FileField(blank=True, max_length=255)
 
     @property
     def filename(self):

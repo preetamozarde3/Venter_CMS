@@ -31,10 +31,29 @@ div.sidebar-wrapper li.wordcloud-item{
 .wordcloud-container{
     height: 85vh;
     border: 1px solid darkslategray;
+    overflow-y: scroll;
+    overflow-x: scroll;
 }
 
 #label_domain_name{
     color: blue;
     font-weight: bolder;
     font-size: x-large;
+}
+
+select#category_dropdown{
+    width: 700px;
+    overflow-x: scroll;
+}
+
+#label_domain_name{
+    color: black; font-weight: bolder; font-size: x-large;
+}
+
+#label_category{
+    color: black; font-weight: bolder; font-size: large; visibility: hidden;
+}
+
+#label_category_name{
+    color: black; font-size: medium; visibility: hidden;
 }
