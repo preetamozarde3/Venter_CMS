@@ -28,6 +28,7 @@ from Venter.models import Category, File, Profile
 from .ML_model.ICMC.model.ClassificationService import ClassificationService
 # from Venter import tasks
 from .ML_model.Civis.modeldriver import SimilarityMapping
+from django.template.loader import render_to_string
 
 
 @login_required
@@ -189,6 +190,8 @@ def contact_us(request):
     if request.method == 'POST':
         contact_form = ContactForm(request.POST)
         if contact_form.is_valid():
+            first_name = contact_form.cleaned_data.get('first_name')
+            last_name = contact_form.cleaned_data.get('last_name')
             company_name = contact_form.cleaned_data.get('company_name')
             contact_no = contact_form.cleaned_data.get('contact_no')
             email_address = contact_form.cleaned_data.get('email_address')
@@ -201,8 +204,9 @@ def contact_us(request):
 
             # prepare email body
             email_body = "Dear Admin,\n\n Following are the inquiry details:\n\n " + \
-                "Inquiry Date and Time: "+date_time+"\n Company Name: " + \
-                company_name+"\n Contact Number: "+contact_no+"\n Email address: " + \
+                "Inquiry Date and Time: "+date_time+"\n First Name: " + \
+                first_name+"\n Last Name: "+last_name+"\n Company Name: " + \
+                company_name+"\n Contact Number: "+contact_no+"\n Email ID: " + \
                 email_address+"\n Requirement Details: "+requirement_details+"\n\n"
 
             admin_list = User.objects.filter(is_superuser=True)
@@ -219,6 +223,16 @@ def contact_us(request):
         'contact_form': contact_form,
     })
 
+@require_http_methods(["GET"])
+def about_us(request):
+    """
+    View logic to display Venter product details, its impact, information on organisations associated with Venter.
+
+    For GET request-------
+        The about_us template is rendered
+    """
+    return render(request, './Venter/about_us.html')
+
 
 class FileDeleteView(LoginRequiredMixin, DeleteView):
     """
@@ -233,7 +247,12 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('dashboard')
 
     def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+        if request.user.is_staff:
+            return self.post(request, *args, **kwargs)
+        else:
+            rendered = render_to_string('./Venter/401.html')
+            return HttpResponse(rendered, status=401)
+
 
 
 class FileListView(LoginRequiredMixin, ListView):
@@ -722,66 +741,66 @@ def wordcloud_contents(request, pk):
 
 
 @login_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
 def visualization_dashboard(request, pk):
+    """
+        View logic to display chart editor for the selcted domain
+    """
     filemeta = File.objects.get(pk=pk)
-    if request.method == "POST":
-        json_file_path = os.path.join(BASE_DIR, 'scored_results.json')
-        dict_data = {}
-        domain_list = []
+    json_file_path = os.path.join(BASE_DIR, 'scored_results.json')
+    dict_data = {}
+    domain_list = []
 
-        with open(json_file_path) as json_file:
-            dict_data = json.load(json_file)
+    with open(json_file_path) as json_file:
+        dict_data = json.load(json_file)
 
-        filemeta = File.objects.get(pk=pk)
-        output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
+    filemeta = File.objects.get(pk=pk)
+    output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
 
-        if not os.path.exists(output_directory_path):
-            os.makedirs(output_directory_path)
+    if not os.path.exists(output_directory_path):
+        os.makedirs(output_directory_path)
 
-        temp1 = filemeta.filename
-        temp2 = os.path.splitext(temp1)
-        custom_input_file_name = temp2[0]
-        
-        output_json_file_name = 'results__'+custom_input_file_name+'.json'
-        output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
+    temp1 = filemeta.filename
+    temp2 = os.path.splitext(temp1)
+    custom_input_file_name = temp2[0]
+    
+    output_json_file_name = 'results__'+custom_input_file_name+'.json'
+    output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
 
-        output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
-        output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
+    output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
+    output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
 
-        filemeta.output_file_json = output_file_path_json
-        filemeta.output_file_xlsx = output_file_path_xlsx
-        filemeta.save()
+    filemeta.output_file_json = output_file_path_json
+    filemeta.output_file_xlsx = output_file_path_xlsx
+    filemeta.save()
 
-        #################################################
+    dict_keys = dict_data.keys()
+    domain_list = list(dict_keys)
+    domain_data = {}
 
-        dict_keys = dict_data.keys()
-        domain_list = list(dict_keys)
-        domain_data = {}
+    for domain_name in domain_list:
+        domain_data = dict_data[domain_name]
+        temp = ['Category']
+        index = 0
+        for subCat in domain_data['Novel']:
+            temp.append('Sub category ' + str(index+1))
+            index += 1
+        temp.append({'role': 'style'})
+        domain_stats = []
+        domain_stats.append(temp)
 
-        for domain_name in domain_list:
-            domain_data = dict_data[domain_name]
-            temp = ['Category']
-            index = 0
-            for subCat in domain_data['Novel']:
-                temp.append('Sub category ' + str(index+1))
-                index += 1
-            temp.append({'role': 'style'})
-            domain_stats = []
-            domain_stats.append(temp)
-
-            for category, responselist in domain_data.items():
-                column = [category, len(responselist), '']
-                if category == 'Novel':
-                    column = ['Novel']
-                    for subCat in domain_data[category]:
-                        column.append(len(domain_data[category][subCat]))
-                    column.append('')
-                else:
-                    for i in range(len(domain_stats[0]) - len(column)):
-                        column.insert(2, 0)
-                domain_stats.append(column)
-            dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
-            domain_name = request.POST['input_domain_name']
+        for category, responselist in domain_data.items():
+            column = [category, len(responselist), '']
+            if category == 'Novel':
+                column = ['Novel']
+                for subCat in domain_data[category]:
+                    column.append(len(domain_data[category][subCat]))
+                column.append('')
+            else:
+                for i in range(len(domain_stats[0]) - len(column)):
+                    column.insert(2, 0)
+            domain_stats.append(column)
+        dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
+        domain_name = request.POST['input_domain_name']
             
     return render(request, './Venter/visualization_dashboard.html', {'filemeta': filemeta, 'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'domain_name': domain_name})

@@ -35,7 +35,9 @@
                                     Maharashtra</label>
                             </span>
                         </div>
+
                         <br><br><br>
+
                         <div class="txt1 row">
                             <div class="col-1">
                                 <span class="lnr lnr-envelope"></span>
@@ -49,6 +51,22 @@
                                 <label class="label-address"> venterproject@gmail.com</label>
                             </span>
                         </div>
+
+                        <br><br><br>
+
+                        <div class="txt1 row">
+                            <div class="col-1">
+                                <span class="lnr lnr-phone-handset"></span>
+                            </div>
+                            <div class="col-4">
+                                <label>Phone Number</label>
+                            </div>
+                        </div>
+                        <div class="address">
+                            <span class="txt2">
+                                <label class="label-address"> +91 836 906 8038</label>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <form class="contact100-form validate-form" method="post" action="{% url 'contact_us' %}">
@@ -57,22 +75,32 @@
                         Send Us A Message
                     </span>
 
+                    <label class="label-input100" for="first-name">First Name</label>
+                    <div class="wrap-input100">
+                        {{ contact_form.first_name }}
+                    </div>
+
+                    <label class="label-input100" for="first-name">Last Name</label>
+                    <div class="wrap-input100">
+                        {{ contact_form.last_name }}
+                    </div>
+
                     <label class="label-input100" for="first-name">Company Name</label>
                     <div class="wrap-input100">
                         {{ contact_form.company_name }}
                     </div>
 
-                    <label class="label-input100" for="email">Enter your email</label>
+                    <label class="label-input100" for="email">Email ID</label>
                     <div class="wrap-input100">
                         {{ contact_form.email_address }}
                     </div>
 
-                    <label class="label-input100" for="phone">Enter phone number</label>
+                    <label class="label-input100" for="phone">Phone number</label>
                     <div class="wrap-input100">
                         {{ contact_form.contact_no }}
                     </div>
 
-                    <label class="label-input100" for="message">Message</label>
+                    <label class="label-input100" for="message">Requirments</label>
                     <div class="wrap-input100">
                         {{ contact_form.requirement_details }}
                     </div>

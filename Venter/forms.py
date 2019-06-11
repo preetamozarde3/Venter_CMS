@@ -149,6 +149,14 @@ class ContactForm(forms.Form):
     Usage------
         1) 'contact_us.html' template: Generates the contact form fields in the contact us page for public users
     """
+    first_name = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'First Name'}), required=True,
+                                 validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                                                            message='Please enter a valid first name')])
+    last_name = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Last Name'}), required=True,
+                                 validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                                                            message='Please enter a valid last name')])
     company_name = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Company Name'}), required=True)
     email_address = forms.EmailField(widget=forms.TextInput(
@@ -158,4 +166,4 @@ class ContactForm(forms.Form):
                                  validators=[RegexValidator(regex=r'^[6-9]\d{9}$',
                                                             message='Please enter a valid phone number')])
     requirement_details = forms.CharField(widget=forms.Textarea(
-        attrs={'class': 'form-control', 'placeholder': 'Requirement'}), required=True)
+        attrs={'class': 'form-control', 'placeholder': 'Requirements'}), required=True)

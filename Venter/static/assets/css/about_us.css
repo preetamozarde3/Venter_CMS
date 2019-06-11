@@ -1,0 +1,25 @@
+/*
+Styling for about_us.html
+*/
+  
+  .outer-as{
+    height: 88vh;
+    width: 100vw;
+    background-color: #accffe;
+  }
+  
+  .inner-as {
+    width: 100%;  
+    height: vh;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: #f2f2f2;
+    
+  }

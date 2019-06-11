@@ -233,3 +233,8 @@ Styling for registration.html
   div.sidebar-wrapper li.wordcloud-item{
     display: none;
 }
+
+h1.error-label{
+  text-align: center;
+  font-weight: bold;
+}
