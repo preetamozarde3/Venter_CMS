@@ -193,10 +193,13 @@ def contact_us(request):
             first_name = contact_form.cleaned_data.get('first_name')
             last_name = contact_form.cleaned_data.get('last_name')
             company_name = contact_form.cleaned_data.get('company_name')
+            designation = contact_form.cleaned_data.get('designation')
+            city = contact_form.cleaned_data.get('city')
             contact_no = contact_form.cleaned_data.get('contact_no')
             email_address = contact_form.cleaned_data.get('email_address')
-            requirement_details = contact_form.cleaned_data.get(
-                'requirement_details')
+            detail_1 = contact_form.cleaned_data.get('detail_1')
+            detail_2 = contact_form.cleaned_data.get('detail_2')
+            detail_3 = contact_form.cleaned_data.get('detail_3')
 
             # get current date and time
             now = datetime.datetime.now()
@@ -206,8 +209,12 @@ def contact_us(request):
             email_body = "Dear Admin,\n\n Following are the inquiry details:\n\n " + \
                 "Inquiry Date and Time: "+date_time+"\n First Name: " + \
                 first_name+"\n Last Name: "+last_name+"\n Company Name: " + \
-                company_name+"\n Contact Number: "+contact_no+"\n Email ID: " + \
-                email_address+"\n Requirement Details: "+requirement_details+"\n\n"
+                company_name+"\n Designation: "+designation+"\n City: "+ \
+                city+"\n Contact Number: "+contact_no+"\n Email ID: " + \
+                email_address+"\n Business your organisation is engaged in: " + \
+                detail_1+"\n Relevance of your business to Venter Product: " + \
+                detail_2+"\n How do you think Venter can help your business?" + \
+                detail_3+"\n\n"
 
             admin_list = User.objects.filter(is_superuser=True)
             for admin in admin_list:

@@ -243,6 +243,25 @@ class PredictionModelTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.client.login(username='admin.icmc', password="pass@1234")
+        civis_org = Organisation.objects.create(organisation_name='CIVIS')
+
+        emp_user = User.objects.create_user(username='test_user', password='useruser')
+        staff_user = User.objects.create_superuser(
+            username='test_admin', password='adminadmin', email='admin@example.com'
+        )
+
+        user_profile = Profile.objects.create(user=emp_user, organisation_name=civis_org)
+        staff_profile = Profile.objects.create(user=staff_user, organisation_name=civis_org)
+
+        # Creating dummy xlsx files
+        for i in range(1, 3):
+            with open(os.path.join(os.getcwd(), f'MEDIA/Test_Files/test_{i}.xlsx'), 'w') as f:
+                f.write(f'test_{i}')
+
+        # Creating filemeta objects out of these files
+        File.objects.create(uploaded_by=user_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_1.xlsx'))
+        File.objects.create(uploaded_by=staff_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_2.xlsx'))
+
 
     def file_not_predicted(self):
         response = self.client.get(reverse('dashboard'))
@@ -253,3 +272,41 @@ class PredictionModelTestCase(TestCase):
         filemeta = File.objects.get(input_file=uploaded_file)
         print("================filemeta")
         print(filemeta)
+
+        
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class FileListViewTestCase(TestCase):
+    def setUp(self):
+        civis_org = Organisation.objects.create(organisation_name='CIVIS')
+
+        emp_user = User.objects.create_user(username='test_user', password='useruser')
+        staff_user = User.objects.create_superuser(
+            username='test_admin', password='adminadmin', email='admin@example.com'
+        )
+
+        user_profile = Profile.objects.create(user=emp_user, organisation_name=civis_org)
+        staff_profile = Profile.objects.create(user=staff_user, organisation_name=civis_org)
+
+        # Creating dummy xlsx files
+        for i in range(1, 3):
+            with open(os.path.join(os.getcwd(), f'MEDIA/Test_Files/test_{i}.xlsx'), 'w') as f:
+                f.write(f'test_{i}')
+
+        # Creating filemeta objects out of these files
+        File.objects.create(uploaded_by=user_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_1.xlsx'))
+        File.objects.create(uploaded_by=staff_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_2.xlsx'))
+
+    def file_list_view_employee(self):
+        self.client.login(username='test_user', password='useruser')
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.length, 1)
+        self.client.logout()
+
+    def file_list_view_staff(self):
+        self.client.login(username='test_admin', password='adminadmin')
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.length, 1)
+        self.client.logout()
