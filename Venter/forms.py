@@ -60,6 +60,16 @@ class CSVForm(forms.ModelForm):
                 raise forms.ValidationError(
                     "Please upload .csv extension files only")
 
+            # if filename.endswith(settings.FILE_UPLOAD_TYPE):
+            #     if input_file_header_validation(uploaded_input_file, self.request):
+            #         return uploaded_input_file
+            #     else:
+            #         raise forms.ValidationError(
+            #             "Incorrect headers detected, please upload correct file")
+            # else:
+            #     raise forms.ValidationError(
+            #         "Please upload .csv extension files only")
+
         return uploaded_input_file
 
 

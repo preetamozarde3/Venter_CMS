@@ -1,4 +1,6 @@
 import os
+import json
+import ast
 
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Permission, User
@@ -10,6 +12,7 @@ from django.urls import reverse
 from Venter.forms import ContactForm, CSVForm, ExcelForm, ProfileForm, UserForm
 from Venter.models import Category, File, Header, Organisation, Profile
 from Backend.settings import MEDIA_ROOT
+from Venter.wordcloud import generate_wordcloud
 
 
 @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
@@ -114,7 +117,7 @@ class UploadFileTestCase(TestCase):
         response = self.client.get(reverse('upload_file'))
         self.assertEqual(response.status_code, 200)
 
-        data = open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'rb')
+        data = open(os.path.join(MEDIA_ROOT, 'Coverage Test/responses_1.xlsx'), 'rb')
         file_to_upload = SimpleUploadedFile(data.name, data.read())
         valid_data = {
             "input_file": file_to_upload
@@ -128,7 +131,7 @@ class UploadFileTestCase(TestCase):
         response = self.client.get(reverse('upload_file'))
         self.assertEqual(response.status_code, 200)
 
-        data = open(os.path.join(MEDIA_ROOT, 'ICMC/admin.icmc/2019-05-28/input/15_rows_icmc.csv'), 'rb')
+        data = open(os.path.join(MEDIA_ROOT, 'Coverage Test/15_rows_icmc.csv'), 'rb')
         file_to_upload = SimpleUploadedFile(data.name, data.read())
         invalid_data = {
             "input_file": file_to_upload
@@ -153,7 +156,7 @@ class UploadFileTestCase(TestCase):
         response = self.client.get(reverse('upload_file'))
         self.assertEqual(response.status_code, 200)
 
-        data = open(os.path.join(MEDIA_ROOT, 'ICMC/admin.icmc/2019-05-28/input/15_rows_icmc.csv'), 'rb')
+        data = open(os.path.join(MEDIA_ROOT, 'Coverage Test/15_rows_icmc.csv'), 'rb')
         file_to_upload = SimpleUploadedFile(data.name, data.read())
         valid_data = {
             "input_file": file_to_upload
@@ -167,7 +170,7 @@ class UploadFileTestCase(TestCase):
         response = self.client.get(reverse('upload_file'))
         self.assertEqual(response.status_code, 200)
 
-        data = open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-05-28/input/responses_1.xlsx'), 'rb')
+        data = open(os.path.join(MEDIA_ROOT, 'Coverage Test/responses_1.xlsx'), 'rb')
         file_to_upload = SimpleUploadedFile(data.name, data.read())
         invalid_data = {
             "input_file": file_to_upload
@@ -232,81 +235,98 @@ class UploadFileTestCase(TestCase):
         self.assertTemplateUsed(response, './Venter/upload_file.html')
         self.assertFormError(response, "file_form", "input_file", "File size must not exceed 5 MB")  
 
-
 @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
-class PredictionModelTestCase(TestCase):
+class WordCloudTestCase(TestCase):
     """
-        Test case for user to upload csv/xlsx file
+        Test case for users to view wordcloud for a set of responses per category
     """
     fixtures = ["Venter/fixtures/fixture_new_1.json"]
 
     def setUp(self):
         self.client = Client()
-        self.client.login(username='admin.icmc', password="pass@1234")
-        civis_org = Organisation.objects.create(organisation_name='CIVIS')
 
-        emp_user = User.objects.create_user(username='test_user', password='useruser')
-        staff_user = User.objects.create_superuser(
-            username='test_admin', password='adminadmin', email='admin@example.com'
-        )
+    def test_icmc_wordcloud(self):
+        self.client.login(username="admin.icmc", password="pass@1234")
 
-        user_profile = Profile.objects.create(user=emp_user, organisation_name=civis_org)
-        staff_profile = Profile.objects.create(user=staff_user, organisation_name=civis_org)
-
-        # Creating dummy xlsx files
-        for i in range(1, 3):
-            with open(os.path.join(os.getcwd(), f'MEDIA/Test_Files/test_{i}.xlsx'), 'w') as f:
-                f.write(f'test_{i}')
-
-        # Creating filemeta objects out of these files
-        File.objects.create(uploaded_by=user_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_1.xlsx'))
-        File.objects.create(uploaded_by=staff_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_2.xlsx'))
-
-
-    def file_not_predicted(self):
-        response = self.client.get(reverse('dashboard'))
-        self.assertEqual(response.status_code, 200)
+        pk = 207
+        file = File.objects.get(pk=pk)
         
-        file = open(os.path.join(MEDIA_ROOT, 'CIVIS/admin.civis/2019-06-07/input/responses_2.xlsx'), 'r', encoding='utf-8')
-        uploaded_file = SimpleUploadedFile(file.name, file.read())
-        filemeta = File.objects.get(input_file=uploaded_file)
-        print("================filemeta")
-        print(filemeta)
+        org_name = Organisation.objects.get(organisation_name="ICMC")
+        category_queryset = Category.objects.filter(organisation_name=org_name)
+        category_list = []
+        for element in category_queryset:
+            cat = element.category
+            category_list.append(cat)
 
+        response = self.client.get(reverse('wordcloud', kwargs={"pk": file.pk}))
         
-
-@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
-class FileListViewTestCase(TestCase):
-    def setUp(self):
-        civis_org = Organisation.objects.create(organisation_name='CIVIS')
-
-        emp_user = User.objects.create_user(username='test_user', password='useruser')
-        staff_user = User.objects.create_superuser(
-            username='test_admin', password='adminadmin', email='admin@example.com'
-        )
-
-        user_profile = Profile.objects.create(user=emp_user, organisation_name=civis_org)
-        staff_profile = Profile.objects.create(user=staff_user, organisation_name=civis_org)
-
-        # Creating dummy xlsx files
-        for i in range(1, 3):
-            with open(os.path.join(os.getcwd(), f'MEDIA/Test_Files/test_{i}.xlsx'), 'w') as f:
-                f.write(f'test_{i}')
-
-        # Creating filemeta objects out of these files
-        File.objects.create(uploaded_by=user_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_1.xlsx'))
-        File.objects.create(uploaded_by=staff_profile, input_file=os.path.join(os.getcwd(), 'MEDIA/Test_Files/test_2.xlsx'))
-
-    def file_list_view_employee(self):
-        self.client.login(username='test_user', password='useruser')
-        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.context['category_list'], category_list)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.length, 1)
-        self.client.logout()
+        self.assertTemplateUsed(response, './Venter/wordcloud.html')
 
-    def file_list_view_staff(self):
-        self.client.login(username='test_admin', password='adminadmin')
-        response = self.client.get(reverse('dashboard'))
+    def test_civis_wordcloud(self):
+        self.client.login(username="admin.civis", password="pass@1234")
+
+        pk = 212
+        file = File.objects.get(pk=pk)
+
+        domain_name = "Heritage Conservation"
+        wordcloud_category_list = []
+
+        dict_data = json.load(file.output_file_json)
+        print("=====================dict_data in test case: ", type(dict_data) )
+        print(dict_data)
+        domain_data = dict_data[domain_name]
+        print("=====================domain_data in test case: ", type(domain_data))
+        print(domain_data)
+        for category, category_dict in domain_data.items():
+            wordcloud_category_list.append(category)
+        wordcloud_category_list = wordcloud_category_list[:-1]
+
+        print("===============wordcloud category list=====")
+        print(type(wordcloud_category_list))
+        print(wordcloud_category_list)
+        
+        data = {
+            "wordcloud_domain_name": domain_name
+        }
+
+        response = self.client.post(reverse('wordcloud', kwargs={"pk": file.pk}), data)
+        
+        self.assertEqual(response.context['category_list'], wordcloud_category_list)
+        self.assertEqual(response.context['domain_name'], domain_name)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.length, 1)
-        self.client.logout()
+        self.assertTemplateUsed(response, './Venter/wordcloud.html')
+
+    def test_civis_wordcloud_content(self):
+        self.client.login(username="admin.civis", password="pass@1234")
+
+        pk = 212
+        file = File.objects.get(pk=pk)
+
+        domain_name = "Heritage Conservation"
+        category_name = "set the boundaries of these heritage zones and said that these areas should be conserved, protected and highlighted by provision of transport facilities and tourist infrastructure"
+        temp_cat_list = json.dumps("{'set the boundaries of these heritage zones and said that these areas should be conserved, protected and highlighted by provision of transport facilities and tourist infrastructure', 'The 12 heritage zones identified are: Central Administrative Heritage Zone, Petta and Bangalore Fort, Gavipuram, Basavanagudi and VV Puram, M.G.Road, Shivajinagar, Cleveland Town, Richards Town, Malleshwaram, Ulsoor, Whitefield Inner Circle, Begur Temple and Bangalore Palace Heritage Zone'}")
+        data = {
+            "category_name": category_name,
+            "domain_name": domain_name,
+            "category_list": temp_cat_list
+        }
+        response = self.client.post(reverse('wordcloud_contents', kwargs={"pk": file.pk}), data)
+        output_dict = generate_wordcloud(file.output_file_json.path)
+        domain_items_list = output_dict[domain_name]
+        words = {}
+
+        for domain_item in domain_items_list:
+            if list(domain_item.keys())[0].split('\n')[0].strip() == category_name.strip():
+                words = list(domain_item.values())[0]
+
+        category_list = json.loads(temp_cat_list)
+        self.assertEqual(response.context['category_list'], category_list)
+        self.assertEqual(response.context['domain_name'], domain_name)
+        self.assertEqual(response.context['words'], words)
+        self.assertEqual(response.context['category_name'], category_name)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, './Venter/wordcloud.html')
+
+

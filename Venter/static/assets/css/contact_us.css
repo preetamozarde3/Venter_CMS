@@ -150,10 +150,6 @@ button:hover {
     border-radius: 50%;
   }
   
-  .fa:hover {
-      opacity: 0.7;
-  }
-  
   .fa-facebook {
     background: #3B5998;
     color: white;
