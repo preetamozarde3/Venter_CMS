@@ -1,25 +1,64 @@
 /*
 Styling for about_us.html
 */
+  @font-face {
+    font-family: Poppins-Regular;
+    src: url('../fonts/poppins/Poppins-Regular.ttf'); 
+  }  
+
+  @font-face {
+    font-family: Montserrat-Light;
+    src: url('../fonts/montserrat/Montserrat-Light.ttf'); 
+  }
   
+  @font-face {
+    font-family: Montserrat-Regular;
+    src: url('../fonts/montserrat/Montserrat-Regular.ttf'); 
+  }
+
   .outer-as{
-    height: 88vh;
     width: 100vw;
     background-color: #accffe;
   }
   
   .inner-as {
-    width: 100%;  
-    height: vh;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -moz-box;
-    display: -ms-flexbox;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    background: #f2f2f2;
-    
+    width: 100vw;
+    background-color: white;
+  }
+
+  .label1{
+    font-family: Poppins-Regular;
+    font-size: 40px;
+    color: #333333;
+    align-self: center;
+  }
+
+  .label2{
+    font-family: Montserrat-Light;
+    font-size: 18px;
+    color: #000000;
+  }
+
+  .label3{
+    font-family: Montserrat-Regular;
+    font-size: 18px;
+    color: #000000;
+  }
+
+  .upper-content{
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-top: 20px;
+  }
+
+  .lower-content{
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-bottom: 50px;
+  }
+
+  .impact-image{
+    width: 500px;
+    height: 150px;
+    border: solid 1px #000000;
   }

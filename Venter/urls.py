@@ -23,6 +23,8 @@ urlpatterns = [
     path('delete_file/<int:pk>', views.FileDeleteView.as_view(), name='delete_file'),
     # ex: /venter/category_list/civis/
     path('category_list/', views.CategoryListView.as_view(), name='category_list'),
+    # ex: /venter/add_proposal/
+    path('add_proposal/', views.AddProposalView.as_view(), name='add_proposal'),
     # ex: /venter/dashboard/
     path('dashboard/', views.FileListView.as_view(), name='dashboard'),
     # ex: /venter/contact_us/
@@ -39,8 +41,8 @@ urlpatterns = [
     path('wordcloud/<int:pk>', views.wordcloud, name='wordcloud'),
     # ex: /venter/wordcloud_contents/5/
     path('wordcloud_contents/<int:pk>', views.wordcloud_contents, name='wordcloud_contents'),
-    # ex: /venter/visualization_dashboard/5/
-    path('visualization_dashboard/<int:pk>', views.visualization_dashboard, name='visualization_dashboard'),
+    # ex: /venter/chart_editor/5/
+    path('chart_editor/<int:pk>', views.chart_editor, name='chart_editor'),
     # ex: password_reset/
     path('password_reset/',
          auth.views.PasswordResetView.as_view(template_name='Venter/password_reset_form.html'),

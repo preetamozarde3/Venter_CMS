@@ -233,6 +233,41 @@ def contact_us(request):
         'contact_form': contact_form,
     })
 
+class AddProposalView(LoginRequiredMixin, CreateView):
+    """
+    Arguments------
+        1) CreateView: View to add proposal by a CIVIS organisation_admin only.
+        2) LoginRequiredMixin: Request to add proposal by non-authenticated users,
+        will throw an HTTP 404 error
+    """
+    model = User
+
+    def post(self, request, *args, **kwargs):
+        user_form = UserForm(request.POST)
+        if user_form.is_valid():
+            user_obj = user_form.save(commit=False)
+            password = user_form.cleaned_data.get('password')
+            try:
+                validate_password(password, user_obj)
+                user_obj.set_password(password)
+                user_obj.save()
+                org_name = request.user.profile.organisation_name
+                profile = Profile.objects.create(
+                    user=user_obj, organisation_name=org_name)
+                profile.save()
+                user_form = UserForm()
+                return render(request, './Venter/add_proposal.html',
+                              {'user_form': user_form, 'successful_submit': True})
+            except ValidationError as e:
+                user_form.add_error('password', e)
+                return render(request, './Venter/add_proposal.html', {'user_form': user_form})
+        else:
+            return render(request, './Venter/add_proposal.html', {'user_form': user_form})
+
+    def get(self, request, *args, **kwargs):
+        user_form = UserForm()
+        return render(request, './Venter/add_proposal.html', {'user_form': user_form})    
+
 @require_http_methods(["GET"])
 def about_us(request):
     """
@@ -734,7 +769,7 @@ def wordcloud_contents(request, pk):
 
 @login_required
 @require_http_methods(["POST"])
-def visualization_dashboard(request, pk):
+def chart_editor(request, pk):
     """
         View logic to display chart editor for the selcted domain
     """
@@ -795,4 +830,4 @@ def visualization_dashboard(request, pk):
         dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
         domain_name = request.POST['input_domain_name']
    
-    return render(request, './Venter/visualization_dashboard.html', {'filemeta': filemeta, 'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'domain_name': domain_name})
+    return render(request, './Venter/chart_editor.html', {'filemeta': filemeta, 'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'domain_name': domain_name})
