@@ -57,8 +57,35 @@ Styling for about_us.html
     margin-bottom: 50px;
   }
 
-  .impact-image{
-    width: 500px;
+  .civis_impact1, .civis_impact2, .icmc_impact1, .icmc_impact2{
+    width: 150px;
     height: 150px;
-    border: solid 1px #000000;
+    margin-left: 70px;
+  }
+
+  .impact_content{
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  .prof-link{
+    color: black;
+    font-family: Montserrat-Regular;
+  }
+
+  .prof-link:hover{
+    text-decoration: underline;
+    color: black;
+    font-family: Montserrat-Regular;
+  }
+
+  .civis_logo{
+    width: 200px;
+    height: 150px;
+    margin-left: 50px;
+  }
+
+  .icmc_logo{
+    width: 200px;
+    height: 150px;
+    margin-left: 50px;
   }

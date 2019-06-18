@@ -182,7 +182,7 @@ td.table-cell-cat{
 }
 
 div.sidebar-wrapper li.wordcloud-item{
-    display: block;
+    display: none;
 }
 
 #tbody_table tr {

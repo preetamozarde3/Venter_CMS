@@ -165,6 +165,22 @@ button:hover {
     color: white;
   }
 
+  .fa-facebook:hover {
+    background: #91a6d4;
+    color: white;
+  }
+
+  .fa-linkedin:hover {
+    background: #66cfff;
+    color: white;
+  }
+  
+  .fa-youtube:hover {
+    background:  #ff4d4d;
+    color: white;
+  }
+
+
   .media-icons-row{
     display: flex;
     justify-content: center;

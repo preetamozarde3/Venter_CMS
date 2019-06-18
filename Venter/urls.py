@@ -29,6 +29,8 @@ urlpatterns = [
     path('dashboard/', views.FileListView.as_view(), name='dashboard'),
     # ex: /venter/contact_us/
     path('contact_us/', views.contact_us, name='contact_us'),
+    # ex: /venter/request_demo/
+    path('request_demo/', views.request_demo, name='request_demo'),
     # ex: /venter/about_us/
     path('about_us/', views.about_us, name='about_us'),
     # ex: /venter/predict_result/5/

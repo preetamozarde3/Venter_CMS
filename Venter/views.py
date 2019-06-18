@@ -63,7 +63,7 @@ def upload_file(request):
                 return render(request, './Venter/upload_file.html', {
                     'file_form': excel_form, 'successful_submit': True})
         return render(request, './Venter/upload_file.html', {
-            'file_form': excel_form})
+            'file_form': excel_form, 'successful_submit': False})
     else:
         file_form = CSVForm(request=request)
         if request.method == 'POST':
@@ -77,7 +77,7 @@ def upload_file(request):
                     'file_form': file_form, 'successful_submit': True})
 
         return render(request, './Venter/upload_file.html', {
-            'file_form': file_form})
+            'file_form': file_form, 'successful_submit': False})
 
 class CategoryListView(LoginRequiredMixin, ListView):
     """
@@ -121,11 +121,11 @@ class UpdateProfileView(LoginRequiredMixin, UpdateView):
                           {'profile_form': profile_form, 'successful_submit': True})
         else:
             return render(request, './Venter/update_profile.html',
-                          {'profile_form': profile_form})
+                          {'profile_form': profile_form, 'successful_submit': False})
 
     def get(self, request, *args, **kwargs):
         profile_form = ProfileForm(instance=request.user.profile)
-        return render(request, './Venter/update_profile.html', {'profile_form': profile_form})
+        return render(request, './Venter/update_profile.html', {'profile_form': profile_form, 'successful_submit': False})
 
 
 class RegisterEmployeeView(LoginRequiredMixin, CreateView):
@@ -168,13 +168,13 @@ class RegisterEmployeeView(LoginRequiredMixin, CreateView):
                               {'user_form': user_form, 'successful_submit': True})
             except ValidationError as e:
                 user_form.add_error('password', e)
-                return render(request, './Venter/registration.html', {'user_form': user_form})
+                return render(request, './Venter/registration.html', {'user_form': user_form, 'successful_submit': False})
         else:
-            return render(request, './Venter/registration.html', {'user_form': user_form})
+            return render(request, './Venter/registration.html', {'user_form': user_form, 'successful_submit': False})
 
     def get(self, request, *args, **kwargs):
         user_form = UserForm()
-        return render(request, './Venter/registration.html', {'user_form': user_form})
+        return render(request, './Venter/registration.html', {'user_form': user_form, 'successful_submit': False})
 
 
 def contact_us(request):
@@ -230,8 +230,64 @@ def contact_us(request):
             return render(request, './Venter/contact_us.html', {
                 'contact_form': contact_form, 'successful_submit': True})
     return render(request, './Venter/contact_us.html', {
-        'contact_form': contact_form,
+        'contact_form': contact_form, 'successful_submit': False
     })
+
+def request_demo(request):
+    """
+    View logic to email the administrator the contact details submitted by an organisation requesting demo.
+    The contact details are submitted through the 'request_demo' template form.
+
+    For POST request-------
+        The contact details of an organisation are collected in the ContactForm.
+        If the form is valid, an email is sent to the website administrator.
+    For GET request-------
+        The request_demo template is rendered
+    """
+    contact_form = ContactForm()
+
+    if request.method == 'POST':
+        contact_form = ContactForm(request.POST)
+        if contact_form.is_valid():
+            first_name = contact_form.cleaned_data.get('first_name')
+            last_name = contact_form.cleaned_data.get('last_name')
+            company_name = contact_form.cleaned_data.get('company_name')
+            designation = contact_form.cleaned_data.get('designation')
+            city = contact_form.cleaned_data.get('city')
+            contact_no = contact_form.cleaned_data.get('contact_no')
+            email_address = contact_form.cleaned_data.get('email_address')
+            detail_1 = contact_form.cleaned_data.get('detail_1')
+            detail_2 = contact_form.cleaned_data.get('detail_2')
+            detail_3 = contact_form.cleaned_data.get('detail_3')
+
+            # get current date and time
+            now = datetime.datetime.now()
+            date_time = now.strftime("%Y-%m-%d %H:%M")
+
+            # prepare email body
+            email_body = "Dear Admin,\n\n Following are the inquiry details:\n\n " + \
+                "Inquiry Date and Time: "+date_time+"\n First Name: " + \
+                first_name+"\n Last Name: "+last_name+"\n Company Name: " + \
+                company_name+"\n Designation: "+designation+"\n City: "+ \
+                city+"\n Contact Number: "+contact_no+"\n Email ID: " + \
+                email_address+"\n Business your organisation is engaged in: " + \
+                detail_1+"\n Relevance of your business to Venter Product: " + \
+                detail_2+"\n How do you think Venter can help your business?" + \
+                detail_3+"\n\n"
+
+            admin_list = User.objects.filter(is_superuser=True)
+            for admin in admin_list:
+                s = (admin.username, admin.email)
+                ADMINS.append(s)
+
+            mail_admins('Venter Inquiry', email_body)
+            # contact_form.save()
+            contact_form = ContactForm()
+            return render(request, './Venter/request_demo.html', {
+                'contact_form': contact_form, 'successful_submit': True})
+    return render(request, './Venter/request_demo.html', {
+        'contact_form': contact_form, 'successful_submit': False
+    })    
 
 class AddProposalView(LoginRequiredMixin, CreateView):
     """
@@ -260,13 +316,13 @@ class AddProposalView(LoginRequiredMixin, CreateView):
                               {'user_form': user_form, 'successful_submit': True})
             except ValidationError as e:
                 user_form.add_error('password', e)
-                return render(request, './Venter/add_proposal.html', {'user_form': user_form})
+                return render(request, './Venter/add_proposal.html', {'user_form': user_form, 'successful_submit': False})
         else:
-            return render(request, './Venter/add_proposal.html', {'user_form': user_form})
+            return render(request, './Venter/add_proposal.html', {'user_form': user_form, 'successful_submit': False})
 
     def get(self, request, *args, **kwargs):
         user_form = UserForm()
-        return render(request, './Venter/add_proposal.html', {'user_form': user_form})    
+        return render(request, './Venter/add_proposal.html', {'user_form': user_form, 'successful_submit': False})    
 
 @require_http_methods(["GET"])
 def about_us(request):
