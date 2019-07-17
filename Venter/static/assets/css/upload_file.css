@@ -1,6 +1,17 @@
 /*
 Styling for upload_file.html
 */
+
+@font-face {
+  font-family: "Muli-SemiBold";
+  src: url("../../assets/fonts/muli/Muli-SemiBold.ttf"); 
+}
+
+@font-face {
+  font-family: "Muli-Regular";
+  src: url("../../assets/fonts/muli/Muli-Regular.ttf"); 
+}
+
 .outer-upload-file {
   background-color: #b3cefa;
   width: 100%;
@@ -16,7 +27,7 @@ Styling for upload_file.html
   padding: 2%;
 }
 
-.uploadinner {
+.upload-inner {
   width: 400px;
   border-radius: 20px;
   border: solid #3c7ee4;
@@ -35,14 +46,6 @@ Styling for upload_file.html
   font-size: 30px;
 }
 
-.submitbtn {
-  background-color: #6595dd;
-  color: white;
-  padding: 10px 18px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 10px;
-}
 .modal-body{
   height: 180px;
   background-color: #32bc65;
@@ -80,3 +83,70 @@ div.sidebar-wrapper li.wordcloud-item{
   display: none;
 }
 
+.submit-upload-file {
+  border: none;
+  width: 100%;
+  height: 49px;
+  margin-top: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #99ccff;
+  color: #fff;
+  text-transform: uppercase;
+  font-family: "Muli-SemiBold";
+  font-size: 15px;
+  letter-spacing: 2px;
+  transition: all 0.5s;
+  position: relative;
+  overflow: hidden; }
+.submit-upload-file span {
+  position: relative;
+  z-index: 2; }
+.submit-upload-file:hover{
+  background: #1a8cff;
+}
+.submit-upload-file:before, .submit-upload-file:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: rgba(52, 152, 253, 0.25);
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  -webkit-transform: translate(-100%, 0);
+  transform: translate(-100%, 0);
+  -webkit-transition-timing-function: cubic-bezier(0.75, 0, 0.125, 1);
+  transition-timing-function: cubic-bezier(0.75, 0, 0.125, 1); }
+.submit-upload-file:after {
+  -webkit-transition-delay: 0.2s;
+  transition-delay: 0.2s; }
+.submit-upload-file:hover:before, .submit-upload-file:hover:after {
+  -webkit-transform: translate(0, 0);
+  transform: translate(0, 0); }
+
+.proposal_title{
+ font-family: Muli-Regular;
+ color: #000000;
+}
+
+#id_proposal{
+  width: 180px;
+  height: 40px;
+}
+
+.domain-present-label{
+  font-family: Muli-Regular;
+  color: #000000;
+}
+
+.domain_choice_holder{
+  text-align: center;
+}

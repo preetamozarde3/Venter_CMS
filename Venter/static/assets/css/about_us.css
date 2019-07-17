@@ -67,12 +67,12 @@ Styling for about_us.html
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
 
-  .prof-link{
+  .prof-link, .msr-link{
     color: black;
     font-family: Montserrat-Regular;
   }
 
-  .prof-link:hover{
+  .prof-link:hover, .msr-link:hover{
     text-decoration: underline;
     color: black;
     font-family: Montserrat-Regular;

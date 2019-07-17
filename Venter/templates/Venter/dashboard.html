@@ -86,13 +86,25 @@
             </a>  
             {% else %}
               {% if file.uploaded_by.organisation_name|stringformat:"s" == 'CIVIS' %}
-                <a href="{{file.output_file_xlsx.url}}", download="results.xlsx">
-                  <i class="fa fa-download download-fa" aria-hidden="true"></i>
-                </a>
+                {% if request.user.username|stringformat:"s" == 'dummy_user.civis' %}
+                  <a>
+                    <i class="fa fa-download download-fa" aria-hidden="true"></i>
+                  </a> 
+                {% else %}
+                  <a href="{{file.output_file_xlsx.url}}", download="results.xlsx">
+                    <i class="fa fa-download download-fa" aria-hidden="true"></i>
+                  </a>  
+                {% endif %} 
               {% else %}  
-                <a href="{{file.output_file_xlsx.url}}", download="results.csv">
-                  <i class="fa fa-download download-fa" aria-hidden="true"></i>
-                </a>  
+                {% if request.user.username|stringformat:"s" == 'dummy_user.icmc' %}
+                  <a>
+                    <i class="fa fa-download download-fa" aria-hidden="true"></i>
+                  </a> 
+                {% else %}
+                  <a href="{{file.output_file_xlsx.url}}", download="results.csv">
+                    <i class="fa fa-download download-fa" aria-hidden="true"></i>
+                  </a>  
+                {% endif %}  
               {% endif %}  
             {% endif %}  
           </td>

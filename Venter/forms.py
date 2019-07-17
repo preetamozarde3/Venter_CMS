@@ -1,10 +1,11 @@
+import os
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import (EmailValidator, FileExtensionValidator,
                                     RegexValidator)
 
 from Backend import settings
-from Venter.models import File, Profile
+from Venter.models import Domain, File, Keyword, Profile, Proposal
 
 from .validate import input_file_header_validation
 
@@ -75,22 +76,33 @@ class CSVForm(forms.ModelForm):
 
 class ExcelForm(forms.ModelForm):
     """
-    ModelForm, generated from Django's fil model.
+    ModelForm, generated from Django's file model.
     """
+    CHOICES = ((True, 'Yes'), (False, 'No'))
+
     input_file = forms.FileField(
         widget=forms.FileInput(),
         required=True,
         validators=[FileExtensionValidator(allowed_extensions=['xlsx'])],
+    )
+    proposal = forms.ModelChoiceField(
+        required=True,
+        queryset=Proposal.objects.all(),
+    )
+    domain_present = forms.ChoiceField(
+        widget=forms.RadioSelect,
+        required=True,
+        choices=CHOICES,
     )
 
     class Meta:
         """
         Meta class------
             1) declares 'File' as the model class to generate the 'file_upload_form'
-            2) includes only one field with .xlsx file extension validation
+            2) includes three fields to check .xlsx file extension validation; to add a proposal for the input file; to check domain flag
         """
         model = File
-        fields = ('input_file',)
+        fields = ('input_file', 'proposal', 'domain_present')
 
     def __init__(self, *args, **kwargs):
         """
@@ -149,7 +161,21 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ('phone_number', 'profile_picture')
 
-    profile_picture = forms.FileField(widget=forms.FileInput(), required=False)
+    profile_picture = forms.FileField(
+        widget=forms.FileInput(),
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg'])],)
+
+    def save(self, *args, **kwargs):
+        """
+        Update the primary profile picture on the related User object as well.
+        """
+        user_instance = self.instance.user
+        image_path = user_instance.profile.profile_picture.name
+        if os.path.isfile(image_path):
+            os.remove(image_path)
+        profile_instance = super(ProfileForm, self).save(*args, **kwargs)
+        return profile_instance
 
 
 class ContactForm(forms.Form):
@@ -161,29 +187,102 @@ class ContactForm(forms.Form):
     """
     first_name = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'First Name', 'autofocus': 'autofocus'}), required=True,
-                                 validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                            validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
                                                             message='Please enter a valid first name')])
     last_name = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Last Name'}), required=True,
-                                 validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
-                                                            message='Please enter a valid last name')])
+                            validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                                                           message='Please enter a valid last name')])
     company_name = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Company Name'}), required=True)
+        attrs={'class': 'form-control', 'placeholder': 'Company Name'}), required=True,
+                            validators=[RegexValidator(regex=r'^[\w\s]*$',
+                                                           message='Please enter a valid company name')])
     designation = forms.CharField(widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Designation'}), required=True)
+        attrs={'class': 'form-control', 'placeholder': 'Designation'}), required=True,
+                           validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                                                      message='Please enter a valid designation')])
     city = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'City'}), required=True,
-                                 validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
-                                                            message='Please enter a valid city name')])
+                           validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                                                      message='Please enter a valid city name')])
     email_address = forms.EmailField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Email'}), required=True, validators=[EmailValidator])
     contact_no = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Contact Number'}), required=True, max_length=10,
-                                 validators=[RegexValidator(regex=r'^[6-9]\d{9}$',
+                           validators=[RegexValidator(regex=r'^[6-9]\d{9}$',
                                                             message='Please enter a valid phone number')])
     detail_1 = forms.CharField(widget=forms.Textarea(
         attrs={'class': 'form-control'}), required=True)
     detail_2 = forms.CharField(widget=forms.Textarea(
         attrs={'class': 'form-control'}), required=True)
     detail_3 = forms.CharField(widget=forms.Textarea(
-        attrs={'class': 'form-control'}))        
+        attrs={'class': 'form-control'}), required=False)
+
+class ProposalForm(forms.ModelForm):
+    """
+    Modelform, generated from Django's Proposal model.
+
+    Note------
+        CSS styling done per widget instance
+
+    Usage------
+        1) 'add_proposal.html' template: Generates the proposal form fields in the add proposal page for civis users
+        2) includes only one field 'proposal_name' from the Proposal model (in models.py)
+    """
+    class Meta:
+        """
+        Meta class------
+            1) declares 'Proposal' as the model class to generate the 'proposal_form'
+        """
+        model = Proposal
+        fields = ('proposal_name',)
+    proposal_name = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Proposal Name', 'autofocus': 'autofocus'}),
+                                    validators=[RegexValidator(regex=r'^[\w\s]*$',
+                                                               message='Proposal name may contain letters, digits, underscore and spaces only')])
+
+class DomainForm(forms.ModelForm):
+    """
+    Modelform, generated from Django's Domain model.
+
+    Note------
+        CSS styling done per widget instance
+
+    Usage------
+        1) 'add_proposal.html' template: Generates the domain form fields in the add proposal page for civis users
+        2) includes only one field 'proposal_name' from the Proposal model (in models.py)
+    """
+    class Meta:
+        """
+        Meta class------
+            1) declares 'Domain' as the model class to generate the 'domain_form'
+        """
+        model = Domain
+        fields = ('domain_name',)
+    domain_name = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Add Domain name'}),
+                                  validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                                                             message='Domain name can contain letters and spaces only')])
+
+class KeywordForm(forms.ModelForm):
+    """
+    Modelform, generated from Django's Keyword model.
+
+    Note------
+        CSS styling done per widget instance
+
+    Usage------
+        1) 'add_proposal.html' template: Generates the keyword form fields in the add proposal page for civis users
+        2) includes only one field 'keyword' from the Proposal model (in models.py)
+    """
+    class Meta:
+        """
+        Meta class------
+            1) declares 'Keyword' as the model class to generate the 'keyword_form'
+        """
+        model = Keyword
+        fields = ('keyword',)
+    keyword = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Add Keyword'}),
+                              validators=[RegexValidator(regex=r'^[a-zA-Z\s]*$',
+                                                         message='Keyword can contain letters and spaces only')])

@@ -40,7 +40,7 @@ def mapNounFrequency(sentenceList):
     
     frequency = list(fMap.values())
     normalizer = max(frequency)
-    for entity,raw in zip(fMap, frequency):
+    for entity, raw in zip(fMap, frequency):
         fMap[entity] = int((raw/normalizer)*100)
     return fMap
 
@@ -71,4 +71,19 @@ def generate_wordcloud(path):
                 tempargs.append(scoredresponse['response'].split('-')[-1].strip())
             temp[cats] = mapNounFrequency(tempargs)
     return words
-        
+
+def generate_keywords(sentences):
+    sent=[]
+    sent.append(sentences)
+    word={}
+    final_word=[]
+    for domain in sent:
+        print(len(domain))
+        word['domain'] = mapNounFrequency(domain)
+    for word in word['domain'].keys():
+        if len(word)<=2:
+            print(word)
+            continue
+        else:
+            final_word.append(word)
+    return final_word

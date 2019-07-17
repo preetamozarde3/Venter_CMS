@@ -21,13 +21,34 @@
         <form method="post" action="{% url 'upload_file' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="data title">Upload File</div><br>
-            <div class="uploadinner data">
+            <div class="upload-inner data">
                 <div class="container-file">
                     <label for="{{ form.input_file.id_for_label }}"></label>
                     {{ file_form.input_file }}
                 </div>
-            </div><br>
-            <input type="submit" value="Upload" class="submitbtn data">
+            </div>
+            <br>
+            {% if request.user.profile.organisation_name|stringformat:"s" == "CIVIS" %}
+                <br>
+                <div class="domain_choice_holder">
+                    <label class="domain-present-label">Domains Present</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    {% for choice in file_form.domain_present %}                   
+                        <span class="radio">{{ choice.tag }}</span>
+                        {{ choice.choice_label }}
+                        &nbsp;&nbsp;
+                    {% endfor %}
+                </div>    
+                <br>
+                <div class="data">
+                    <div class="container-file">
+                        <label class="proposal_title">Choose Proposal</label>
+                        &nbsp;&nbsp;
+                        {{ file_form.proposal }}
+                    </div>    
+                </div>
+            {% endif %}
+            <input type="submit" value="Upload" class="submit-upload-file">
         </form>
 
         {% if file_form.errors %}

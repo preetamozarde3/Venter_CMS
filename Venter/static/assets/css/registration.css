@@ -138,6 +138,9 @@ Styling for registration.html
     .submit-register span {
       position: relative;
       z-index: 2; }
+    .submit-register:hover{
+      background: #1a8cff;
+    }  
     .submit-register:before, .submit-register:after {
       content: '';
       position: absolute;

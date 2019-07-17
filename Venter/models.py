@@ -117,6 +117,72 @@ class Category(models.Model):
         verbose_name_plural = 'Category'
 
 
+class Proposal(models.Model):
+    """
+    A proposal that belongs to one or more uploaded xlsx files (organisation: Civis only).
+
+    # Create a Proposal
+    >>> Proposal.objects.create(proposal_name="proposal 1")
+    """
+    proposal_name = models.CharField(
+        max_length=200,
+        primary_key=True,
+    )
+
+    def __str__(self):
+        return self.proposal_name
+
+class Domain(models.Model):
+    """
+    A Domain list associated with each proposal.
+    Eg: Proposal xyz may contain domains in the xlsx file such as- water, parks etc
+
+    # Create a category instance
+    >>> Domain.objects.create(proposal_name="proposal_1", domain_name="Environment")
+    """
+    proposal_name = models.ForeignKey(
+        Proposal,
+        on_delete=models.CASCADE,
+    )
+    domain_name = models.CharField(
+        max_length=200
+    )
+
+    def __str__(self):
+        return self.domain_name
+
+    class Meta:
+        """
+        Declares a plural name for Domain model
+        """
+        verbose_name_plural = 'Domain'
+
+class Keyword(models.Model):
+    """
+    A Keyword list associated with each domain.
+    Eg: Domain 'Environment' may contain keywords in the xlsx file such as- plant more trees in garden etc
+
+    # Create a category instance
+    >>> Keyword.objects.create(domain_name="Environment", keyword="plant more trees")
+    """
+    domain_name = models.ForeignKey(
+        Domain,
+        on_delete=models.CASCADE,
+    )
+    keyword = models.CharField(
+        max_length=200
+    )
+
+    def __str__(self):
+        return self.keyword
+
+    class Meta:
+        """
+        Declares a plural name for Domain model
+        """
+        verbose_name_plural = 'Keyword'
+
+
 class File(models.Model):
     """
     A File uploaded by the logged-in user.
@@ -125,6 +191,7 @@ class File(models.Model):
     # Create a file instance
     >>> File.objects.create(uploaded_by=user_1, input_file="file1.csv", uploaded_date = "Jan. 29, 2019, 7:59 p.m.", has_prediction=False)
     """
+    BOOL_CHOICES = ((True, 'Yes'), (False, 'No'))
     uploaded_by = models.ForeignKey(
         Profile,
         on_delete=models.CASCADE,
@@ -142,8 +209,19 @@ class File(models.Model):
     file_saved_status = models.BooleanField(
         default=False,
     )
+    domain_present = models.BooleanField(
+        choices=BOOL_CHOICES,
+        default=False,
+    )
     output_file_json = models.FileField(blank=True, max_length=255)
     output_file_xlsx = models.FileField(blank=True, max_length=255)
+    proposal = models.ForeignKey(
+        Proposal,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='proposal',
+    )
 
     @property
     def filename(self):

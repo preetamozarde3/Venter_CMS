@@ -12,6 +12,11 @@ Styling for update_profile.html
   src: url('../fonts/montserrat/Montserrat-Bold.ttf'); 
 }
 
+@font-face {
+  font-family: "Muli-SemiBold";
+  src: url("../../assets/fonts/muli/Muli-SemiBold.ttf"); 
+}
+
 .modal-body {
   height: 180px;
   background-color: #32bc65;
@@ -110,40 +115,6 @@ Styling for update_profile.html
   margin-left: 10%;
 }
 
-.update_profile_btn {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 20px;
-  min-width: 150px;
-  height: 62px;
-  background-color: #3c97ec;
-  border-radius: 31px;
-
-  width: calc(100% + 20px);
-  font-family: Poppins-Bold;
-  font-size: 16px;
-  color: #fff;
-  line-height: 1.2;
-  text-transform: uppercase;
-
-  -webkit-transition: all 0.4s;
-  -o-transition: all 0.4s;
-  -moz-transition: all 0.4s;
-  transition: all 0.4s;
-  position: relative;
-  z-index: 1;
-}
-
-.update_profile_btn:hover {
-  background-color: #403866;
-  width: calc(100% + 20px);
-}
-
 div.sidebar-wrapper li.wordcloud-item{
   display: none;
 }
@@ -166,3 +137,52 @@ div.sidebar-wrapper li.wordcloud-item{
 .center{
   margin:0 auto;
 }
+
+.submit-update-profile {
+  border: none;
+  width: 100%;
+  height: 49px;
+  margin-top: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #99ccff;
+  color: #fff;
+  text-transform: uppercase;
+  font-family: "Muli-SemiBold";
+  font-size: 15px;
+  letter-spacing: 2px;
+  transition: all 0.5s;
+  position: relative;
+  overflow: hidden; }
+.submit-update-profile span {
+  position: relative;
+  z-index: 2; }
+.submit-update-profile:hover{
+  background: #1a8cff;
+}
+.submit-update-profile:before, .submit-update-profile:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: rgba(52, 152, 253, 0.25);
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  -webkit-transform: translate(-100%, 0);
+  transform: translate(-100%, 0);
+  -webkit-transition-timing-function: cubic-bezier(0.75, 0, 0.125, 1);
+  transition-timing-function: cubic-bezier(0.75, 0, 0.125, 1); }
+.submit-update-profile:after {
+  -webkit-transition-delay: 0.2s;
+  transition-delay: 0.2s; }
+.submit-update-profile:hover:before, .submit-update-profile:hover:after {
+  -webkit-transform: translate(0, 0);
+  transform: translate(0, 0); }

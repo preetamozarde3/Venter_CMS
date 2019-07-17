@@ -1,51 +1,411 @@
 {% extends 'Venter/base.html' %}
 {% block title %}Add Proposal{% endblock %}
 {% block content %}
-
 <!-- LINEARICONS -->
 <link rel="stylesheet" href="../../static/assets/fonts/linearicons/style.css">
 <script src="../../static/assets/js/jquery-3.3.1.min.js"></script>
 <script src="../../static/assets/js/main.js"></script>
-<link rel="stylesheet" href="../../static/assets/css/registration.css">
+<link rel="stylesheet" href="../../static/assets/css/add_proposal.css">
+
+<script>
+    $(document).ready(function () {
+        document.getElementById("domain-present-holder").style.display = "none";
+        $("#id_domain_name").focus(function () {
+            var label_proposal_name = $("#id_proposal_name").val();
+            if (label_proposal_name.replace(/\s/g, '').length != 0) {
+                var regex = /^[\w\s]*$/;
+                if(regex.test(label_proposal_name) == false){
+                    if($('#proposal-name-error-div').length == 0) {
+                        $(".inner-proposal")
+                        .append('<br>'+
+                                    '<div class="alert alert-danger" id="proposal-name-error-div">'+
+                                        '<strong>Proposal name must contain letters, digits, underscore and spaces only</strong>'+
+                                    '</div>')
+                        $("#id_domain_name").blur();
+                        $("#id_proposal_name").val('');
+                    }
+                }
+                else{
+                    if($('#proposal-name-error-div').length != 0) {
+                        $('#proposal-name-error-div').remove();
+                    }
+                    $("#id_proposal_name").attr('readonly', '');
+                }
+            }
+            else {
+                alert("Please enter a name for the proposal");
+                $("#id_domain_name").blur();
+                $("#id_proposal_name").focus();
+            }
+        });
+        $("#input_custom_keyword_only").focus(function () {
+            if($("#domain-present-holder").is(":hidden")){
+                console.log("inside if of input field function");
+                var label_domain_name = $("#id_domain_name").val();
+                if (label_domain_name.replace(/\s/g, '').length == 0) {
+                    alert("Please enter a name for the domain");
+                    $("#id_domain_name").focus();
+                }
+                else{
+                    var regex = /^[a-zA-Z\s]*$/;
+                    if(regex.test(label_domain_name) == false){
+                        if($('#domain-name-error-div').length == 0) {
+                            $(".inner-proposal")
+                            .append('<br>'+
+                                        '<div class="alert alert-danger" id="domain-name-error-div">'+
+                                            '<strong>Domain name can contain letters and spaces only</strong>'+
+                                        '</div>')
+                            $("#id_domain_name").val('');
+                        }
+                    }
+                    else{
+                        if($('#domain-name-error-div').length != 0) {
+                            $('#domain-name-error-div').remove();
+                        }
+                    }
+                }
+            }
+        });
+        $(".edit_proposal_name_btn").on("click", function () {
+            $("#id_proposal_name").removeAttr('readonly');
+        });
+        $(document).on("click", ".delete-keyword-btn", function() {
+            var parent = $(this).closest("div");
+            parent.remove();
+        });
+        $(document).on("click", ".change-selection", function() {
+            var parent = $(this).closest("li");
+            if(parent.attr("style") == "text-decoration:line-through")
+            {
+                parent.attr("style", "text-decoration:none");
+            }
+            else{
+                parent.attr("style", "text-decoration:line-through");
+            }
+        });
+        $("#id_domain_name").bind("input", function() {
+            var label_domain_name = $("#id_domain_name").val();
+            if (label_domain_name.replace(/\s/g, '').length != 0) {
+                $("#add_domain_present_holder").removeClass("btn-secondary").addClass("btn-warning");   
+            }
+            else{
+                $("#add_domain_present_holder").removeClass("btn-warning").addClass("btn-secondary");   
+            }
+        });
+        $("#domain_paragraph").bind("input", function() {
+            var label_domain_p = $.trim($("textarea").val());
+            if (label_domain_p.replace(/\s/g, '').length != 0) {
+                $("#generate_keyword_btn").removeClass("btn-secondary").addClass("btn-primary");   
+            }
+            else{
+                $("#generate_keyword_btn").removeClass("btn-primary").addClass("btn-secondary");
+            } 
+        });
+    });
+    function generate_keyword()
+    {
+        var label_domain_p = $.trim($("textarea").val());
+        console.log("domain paragraph: ", label_domain_p);
+        var label_domain_name = $("#id_domain_name").val();
+        if (label_domain_p.replace(/\s/g, '').length == 0) {
+            alert("Please enter content for "+label_domain_name+" domain");
+            $("#domain_paragraph").focus();
+        }
+        else{
+            $.ajax({
+                url: '{% url "add_proposal" %}',
+                type: 'GET',
+                data: { 'domain_paragraph': label_domain_p},
+                success: function (resp) {
+                    $(".keyword-form-holder").html(resp);
+                },
+                error: function (err) {
+                    alert("Keywords not generated: " + err.status + " " + err.statusText);
+                }
+            });
+        }
+    }
+    function add_keyword() {
+        if ($("#select_keyword_dropdown")[0].selectedIndex <= 0) {
+            var cat_from_input = $("#input_custom_keyword").val();
+            if (!cat_from_input.replace(/\s/g, '').length) {
+                alert("Please enter a valid input");
+            }
+            else {
+                added_category = cat_from_input;
+                $(".keyword_list")
+                    .prepend('<div class="list-group-item">' +
+                                '<li class="keyword-label">' + added_category + 
+                                '&nbsp;&nbsp;<button type="button" class="delete-keyword-btn">'+
+                                    '<i class="fa fa-minus minus-fa" aria-hidden="true"></i>'+
+                                '</button>'+
+                                '</li>'+
+                            '</div>')
+            }
+            $("#input_custom_keyword").val("");
+        }
+        else {
+            var cat_from_select = $("#select_keyword_dropdown").val();
+            if (cat_from_select == '0') {
+                alert("Please select a valid category");
+            }
+            else {
+                added_category = cat_from_select;
+                $(".keyword_list")
+                .prepend('<div class="list-group-item">' +
+                                '<li class="keyword-label">' + added_category + 
+                                '&nbsp;&nbsp;<button type="button" class="delete-keyword-btn">'+
+                                    '<i class="fa fa-minus minus-fa" aria-hidden="true"></i>'+
+                                '</button>'+
+                                '</li>'+
+                            '</div>')
+            }
+            $("#select_keyword_dropdown")[0].selectedIndex = 0;
+        }
+    }
+    function add_keyword_only() {
+        var cat_from_input = $("#input_custom_keyword_only").val();
+        if (!cat_from_input.replace(/\s/g, '').length) {
+            alert("Please enter a valid input");
+        }
+        else if(cat_from_input.replace(/\s/g, '').length == 1 || cat_from_input.replace(/\s/g, '').length == 2){
+            if($('#keyword-length-error-div').length == 0) {
+                $(".inner-proposal")
+                .append('<br>'+
+                            '<div class="alert alert-danger" id="keyword-length-error-div">'+
+                                '<strong>Keyword has to contain more than two characters</strong>'+
+                            '</div>')
+            }
+            $("#input_custom_keyword_only").val("");
+        }
+        else
+        {
+            var regex = /^[a-zA-Z\s]*$/;
+            if(regex.test(cat_from_input) == false){
+                if($('#keyword-regex-error-div').length == 0) {
+                    $(".inner-proposal")
+                    .append('<br>'+
+                                '<div class="alert alert-danger" id="keyword-regex-error-div">'+
+                                    '<strong>Keyword can contain letters and spaces only</strong>'+
+                                '</div>')
+                }
+                $("#input_custom_keyword_only").val("");
+            }
+            else{
+                if($('#keyword-regex-error-div').length != 0) {
+                    $('#keyword-regex-error-div').remove();
+                }
+                if($('#keyword-length-error-div').length != 0) {
+                    $('#keyword-length-error-div').remove();
+                }
+                added_category = cat_from_input;
+                $(".keyword_list")
+                    .prepend('<div class="list-group-item">' +
+                                '<li class="keyword-label">' + added_category + 
+                                '&nbsp;&nbsp;<button type="button" class="delete-keyword-btn">'+
+                                    '<i class="fa fa-minus minus-fa" aria-hidden="true"></i>'+
+                                '</button>'+
+                                '</li>'+
+                            '</div>')
+                $("#input_custom_keyword_only").val("");        
+            }
+        }
+    }
+    function save_domain(flag)
+    {
+        if (!$(".keyword_list li").length) {
+            alert("Please add keyword(s)");
+        }
+        else{
+            let keyword_list = []
+            $(".keyword_list li").each(function(){
+                if($(this).attr("style") != "text-decoration:line-through"){
+                    let keyword = $(this).text();
+                    keyword = keyword.replace(/\s\s+/g, ' ');
+                    keyword_list.push(keyword);
+                }
+            })
+
+            document.getElementById('proposal_name').value = document.getElementById("id_proposal_name").value;
+            document.getElementById('domain_name').value = document.getElementById("id_domain_name").value;
+            document.getElementById('keyword_list').value = JSON.stringify(keyword_list);
+            document.getElementById('final_submit').value = flag;
+            document.getElementById('successful_submit').value = '{{successful_submit}}';
+
+            $('div#domain-present-holder textarea').prop("disabled",true);
+            document.getElementById('save_domain_form').submit();
+            $('div#domain-present-holder textarea').prop("disabled",false);
+        }
+    }
+    function add_domain_paragraph_holder()
+    {
+        var label_domain_name = $("#id_domain_name").val();
+        if (label_domain_name.replace(/\s/g, '').length == 0) {
+            alert("Please enter a name for the domain");
+            $("#id_domain_name").focus();
+        }
+        else{
+            var regex = /^[a-zA-Z\s]*$/;
+            if(regex.test(label_domain_name) == false){
+                if($('#domain-name-error-div').length == 0) {
+                    $(".inner-proposal")
+                    .append('<br>'+
+                                '<div class="alert alert-danger" id="domain-name-error-div">'+
+                                    '<strong>Domain name may contain letters and spaces only</strong>'+
+                                '</div>')
+                    $("#id_domain_name").val('');
+                }
+            }
+            else{
+                if($('#domain-name-error-div').length != 0) {
+                    $('#domain-name-error-div').remove();
+                }
+                var domain_present_holder = document.getElementById("domain-present-holder");
+                domain_present_holder.style.display = "block";
+                $("#remove_domain_present_holder").removeClass("btn-secondary").addClass("btn-danger");
+                $(".keyword_list").empty();
+            }
+        }
+    }
+    function remove_domain_paragraph_holder(){
+        if($("#domain-present-holder").length != 0){
+            var domain_present_holder = document.getElementById("domain-present-holder");
+            domain_present_holder.style.display = "none";
+            $(".keyword_list").empty();
+        }
+    }
+</script>
 
 {% if user.is_staff %}
     {% if successful_submit %}
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#registerModal").modal('show');
-        });
-    </script>
-    {% endif %}
+        {% if final_submit %}
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    $("#proposalModal").modal('show');
+                });
+            </script>
+        {% else %}
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    $("#id_proposal_name").val('{{ proposal_name }}');
+                    $("#id_proposal_name").attr('readonly', '');
+                    $(".edit_proposal_name_btn").prop('disabled', true);
+                });
+            </script>
+        {% endif %}
+    {% else %}
+        <!-- continue --> 
+    {% endif %}    
 
-    <div class="wrapper-register">
-        <div class="inner-register">
-            <form method="post" enctype="multipart/form-data">
+    <div class="wrapper-proposal">
+        <div class="inner-proposal">
+            <form method="post" enctype="multipart/form-data" id="save_domain_form">
                 {% csrf_token %}
-                <h3 class="title">Employee Registration</h3>
-                <div class="form-holder">
-                    <span class="lnr lnr-user"></span>
-                    {{ user_form.username }}
+
+                <input type="hidden" id="proposal_name" name="proposal_name" value=""/>
+                <input type="hidden" id="domain_name" name="domain_name" value=""/>
+                <input type="hidden" id="keyword_list" name="keyword_list" value=""/>
+                <input type="hidden" id="final_submit" name="final_submit" value=""/>
+                <input type="hidden" id="successful_submit" name="successful_submit" value=""/>
+
+                <h3 class="title">Proposal Details</h3>
+                <div class="row proposal-form-holder">
+                    <div class="col-sm-1">
+                        <button type="button" class="edit_proposal_name_btn">
+                            <i class="fa fa-pencil edit-fa" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="col-sm-7">
+                        {{ proposal_form.proposal_name }}
+                    </div>
                 </div>
-                <div class="form-holder">
-                    <span class="lnr lnr-lock"></span>
-                    {{ user_form.password }}
+                <div id="domain_keyword_outer_container">
+                    <div class="domain-form-holder">
+                        <div class="domain-name-holder">
+                            {{ domain_form.domain_name }}
+                        </div>
+                        <br>
+                        <div id="domain-paragraph-choice-holder" class="row">
+                            <div class="col-sm-6">
+                                <button type="button" id="add_domain_present_holder" class="btn btn-secondary" onclick="add_domain_paragraph_holder();">
+                                    Add domain paragraph &nbsp;<i class="fa fa-plus plus-fa" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="col-sm-6">
+                                <button type="button" id="remove_domain_present_holder" class="btn btn-secondary" onclick="remove_domain_paragraph_holder();">
+                                    Remove domain paragraph &nbsp;<i class="fa fa-minus minus-fa" aria-hidden="true"></i>
+                                </button>
+                            </div>    
+                        </div>
+                        <br>    
+                        <div id="domain-present-holder">
+                            <div class="form-group domain-paragraph-holder">
+                                <textarea class="form-control" rows="5" id="domain_paragraph" placeholder="Add domain paragraph"
+                                    style="border: solid 1 px #000000;"></textarea>
+                            </div>
+                            <div class="load-keyword-button-container">
+                                <button type="button" id="generate_keyword_btn" class="btn btn-secondary" onclick="generate_keyword();">
+                                    Generate keywords &nbsp;<i class="fa fa-circle-o-notch circle-o-notch-fa"
+                                        aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>    
+                    </div>
+                    <div class="keyword-form-holder">
+                        <ul class="list-group keyword_list">
+                            
+                        </ul>
+                        <div class="row dropdown-button-container">
+                            <div class="col-sm-10">
+                                <input name="keyword" class="form-control form-control keyword_input_holder" type="text"
+                                    placeholder="Type keyword to add"
+                                    id="input_custom_keyword_only">
+                            </div>
+                            <div class="col-sm-1">
+                                <button type="button" class="btn add-custom-keyword-btn" onclick="add_keyword_only('False');">
+                                    <i class="fa fa-plus plus-fa" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-holder">
-                    <span class="lnr lnr-envelope"></span>
-                    {{ user_form.email }}
+                <div class="row submit-container">
+                    <div class="col-sm-6">
+                        <button type="button" value="Submit Proposal" class="submit-proposal" onclick="save_domain(true);">
+                                Submit Proposal
+                        </button> 
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="button" value="Save and Add another Domain" class="add-domain" onclick="save_domain(false);">
+                                Save and Add another Domain
+                        </button>        
+                    </div>
                 </div>
-                <div class="form-holder">
-                    <span class="lnr lnr-user"></span>
-                    {{ user_form.first_name }}
-                </div>
-                <div class="form-holder">
-                    <span class="lnr lnr-user"></span>
-                    {{ user_form.last_name }}
-                </div>
-                <input type="submit" value="Register" class="submit-register">
             </form>
-            {% if user_form.errors %}
-            {% for field in user_form %}
+            {% if proposal_form.errors %}
+            {% for field in proposal_form %}
+            {% for error in field.errors %}
+            <br>
+            <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+            </div>
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+
+            {% if domain_form.errors %}
+            {% for field in domain_form %}
+            {% for error in field.errors %}
+            <br>
+            <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+            </div>
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+
+            {% if keyword_form.errors %}
+            {% for field in keyword_form %}
             {% for error in field.errors %}
             <br>
             <div class="alert alert-danger">
@@ -56,8 +416,8 @@
             {% endif %}
         </div>
         <!-- Modal -->
-        <div class="modal fade" id="registerModal" tabindex="-1" role="dialog"
-            aria-labelledby="registerModalTitle" aria-hidden="true">
+        <div class="modal fade" id="proposalModal" tabindex="-1" role="dialog" aria-labelledby="proposalModalTitle"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
@@ -65,16 +425,15 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                         <div class="text-center">
-                            <img src="../../static/assets/img/tick_mark.png" alt="" class="tick_mark-register">
+                            <img src="../../static/assets/img/tick_mark.png" alt="" class="tick_mark-proposal">
                         </div>
                     </div>
                     <div class="modal-footer">
                         <div class="footer-center">
-                            <p class="p1-register">Great!</p>
-                            <p class="p2-register">Registration successful.</p><br>
-                            <a href="{% url 'dashboard' %}">
-                                <button type="button" class="btn btn-warning rounded-4">
-                                    Go To Dashboard &nbsp;&nbsp; <span class="lnr lnr-arrow-right"></span>
+                            <p class="p2-proposal">Proposal has been added.</p><br>
+                            <a href="{% url 'add_proposal' %}">
+                                <button type="button" class="btn btn-info rounded-4">
+                                    Add Proposal &nbsp;&nbsp; <span class="lnr lnr-pencil"></span>
                                 </button>
                             </a>
                         </div>
@@ -82,7 +441,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 {% else %}
     <h1 class="error-label">You don't have access rights to this page.</h1>

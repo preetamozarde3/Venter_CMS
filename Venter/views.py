@@ -1,9 +1,7 @@
-import array
 import datetime
 import json
 import os
 import re
-import ast
 from ast import literal_eval
 from collections import defaultdict
 
@@ -16,21 +14,24 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.mail import mail_admins
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
+from nltk import tokenize
 
-from Backend.settings import ADMINS, BASE_DIR, MEDIA_ROOT
-from Venter.forms import ContactForm, CSVForm, ExcelForm, ProfileForm, UserForm
-from Venter.models import Category, File, Profile
-
+from Backend.settings import ADMINS, MEDIA_ROOT
+from Venter.forms import (ContactForm, CSVForm, DomainForm, ExcelForm,
+                          KeywordForm, ProfileForm, ProposalForm, UserForm)
+from Venter.models import Category, Domain, File, Keyword, Profile, Proposal
 # from Venter import tasks
-from Venter.wordcloud import generate_wordcloud
+from Venter.wordcloud import generate_wordcloud, generate_keywords
+
 from .ML_model.Civis.modeldriver import SimilarityMapping
+from .ML_model.keyword_model.modeldriver import KeywordSimilarityMapping
 from .ML_model.ICMC.model.ClassificationService import ClassificationService
 
 
@@ -281,13 +282,12 @@ def request_demo(request):
                 ADMINS.append(s)
 
             mail_admins('Venter Inquiry', email_body)
-            # contact_form.save()
             contact_form = ContactForm()
             return render(request, './Venter/request_demo.html', {
                 'contact_form': contact_form, 'successful_submit': True})
     return render(request, './Venter/request_demo.html', {
         'contact_form': contact_form, 'successful_submit': False
-    })    
+    })
 
 class AddProposalView(LoginRequiredMixin, CreateView):
     """
@@ -295,34 +295,93 @@ class AddProposalView(LoginRequiredMixin, CreateView):
         1) CreateView: View to add proposal by a CIVIS organisation_admin only.
         2) LoginRequiredMixin: Request to add proposal by non-authenticated users,
         will throw an HTTP 404 error
+    For POST request-------
+        The proposal details are validated in the ProposalForm, DomainForm and saved in the Proposal, Domain, Keyword model.
+        If the user clicks on 'Save and add another domain' button, the domain-keyword dictionary is saved against an existing proposal name.
+    For GET request-------
+        The add_proposal template is rendered
     """
-    model = User
+    model = Proposal
 
     def post(self, request, *args, **kwargs):
-        user_form = UserForm(request.POST)
-        if user_form.is_valid():
-            user_obj = user_form.save(commit=False)
-            password = user_form.cleaned_data.get('password')
-            try:
-                validate_password(password, user_obj)
-                user_obj.set_password(password)
-                user_obj.save()
-                org_name = request.user.profile.organisation_name
-                profile = Profile.objects.create(
-                    user=user_obj, organisation_name=org_name)
-                profile.save()
-                user_form = UserForm()
+        proposal_form = ProposalForm(request.POST)
+        domain_form = DomainForm(request.POST)
+
+        proposal_name = request.POST['proposal_name']
+        domain_name = request.POST['domain_name']
+        temp_keyword_list = json.loads(request.POST['keyword_list'])
+        temp_final_submit = request.POST['final_submit']
+        temp_successful_submit = request.POST['successful_submit']
+
+        if temp_final_submit == "true":
+            final_submit = True
+        elif temp_final_submit == "false":
+            final_submit = False
+
+        if temp_successful_submit == "True":
+            successful_submit = True
+        elif temp_successful_submit == "False":
+            successful_submit = False
+
+        if not successful_submit:
+            proposal_form = ProposalForm(request.POST)
+            proposal_valid = proposal_form.is_valid()
+            if proposal_valid:
+                proposal_name = proposal_form.cleaned_data['proposal_name']
+                proposal_obj = Proposal.objects.create(proposal_name=proposal_name)
+                proposal_obj.save()
+            else:
                 return render(request, './Venter/add_proposal.html',
-                              {'user_form': user_form, 'successful_submit': True})
-            except ValidationError as e:
-                user_form.add_error('password', e)
-                return render(request, './Venter/add_proposal.html', {'user_form': user_form, 'successful_submit': False})
+                                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'successful_submit': False})
+
+        keyword_list = []
+        for temp1 in temp_keyword_list:
+            temp2 = temp1.lstrip()
+            temp3 = temp2.rstrip()
+            keyword_list.append(temp3)
+
+        proposal_obj = Proposal.objects.get(proposal_name = proposal_name)
+
+        domain_obj = Domain.objects.create(
+            proposal_name=proposal_obj, domain_name=domain_name)
+        domain_obj.save()
+
+        for keyword in keyword_list:
+            keyword_obj = Keyword.objects.create(
+                domain_name=domain_obj, keyword=keyword)
+            keyword_obj.save()
+
+        proposal_form = ProposalForm()
+        domain_form = DomainForm()
+
+        if final_submit:
+            return render(request, './Venter/add_proposal.html',
+                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'final_submit': final_submit, 'successful_submit': True})
         else:
-            return render(request, './Venter/add_proposal.html', {'user_form': user_form, 'successful_submit': False})
+            return render(request, './Venter/add_proposal.html',
+                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'final_submit': final_submit, 'successful_submit': True, 'proposal_name': proposal_name})
+        return render(request, './Venter/add_proposal.html',
+                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'successful_submit': False})
 
     def get(self, request, *args, **kwargs):
-        user_form = UserForm()
-        return render(request, './Venter/add_proposal.html', {'user_form': user_form, 'successful_submit': False})    
+        proposal_form = ProposalForm()
+        domain_form = DomainForm()
+        keyword_form = KeywordForm()
+
+        if request.is_ajax():
+            domain_paragraph = request.GET.get('domain_paragraph')
+            domain_paragraph = domain_paragraph.replace('\n', ' ')
+            domain_paragraph_sentence_list = []
+            domain_paragraph_sentence_list = tokenize.sent_tokenize(domain_paragraph)
+
+            keyword_list = []
+            keyword_list = generate_keywords(domain_paragraph_sentence_list)
+            
+            keyword_dropdown = ["keyword one", "keyword two", "keyword three", "keyword four", "keyword five", "keyword six"]
+            return render(request, './Venter/proposal_keyword_data.html',
+                            {'keyword_list': keyword_list, 'keyword_dropdown': keyword_dropdown})
+        return render(request, './Venter/add_proposal.html',
+                            {'proposal_form': proposal_form, 'domain_form': domain_form, 'keyword_form': keyword_form, 'successful_submit': False})
 
 @require_http_methods(["GET"])
 def about_us(request):
@@ -353,7 +412,6 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
         else:
             rendered = render_to_string('./Venter/401.html')
             return HttpResponse(rendered, status=401)
-
 
 
 class FileListView(LoginRequiredMixin, ListView):
@@ -399,33 +457,6 @@ def predict_result(request, pk):
         2) prediction_results.html template is rendered
     """
 
-    # json_file_path = os.path.join(BASE_DIR, 'scored_results_1.json')
-    # domain_list = []
-    # dict_data = {}
-
-    # with open(json_file_path) as json_file:
-    #     dict_data = json.load(json_file)
-
-    # filemeta = File.objects.get(pk=pk)
-    # output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
-
-    # if not os.path.exists(output_directory_path):
-    #     os.makedirs(output_directory_path)
-
-    # temp1 = filemeta.filename
-    # temp2 = os.path.splitext(temp1)
-    # custom_input_file_name = temp2[0]
-    
-    # output_json_file_name = 'results__'+custom_input_file_name+'.json'
-    # output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
-
-    # output_file_path_json = os.path.join(output_directory_path, output_json_file_name)
-    # output_file_path_xlsx = os.path.join(output_directory_path, output_xlsx_file_name)
-
-    # filemeta.output_file_json = output_file_path_json
-    # filemeta.output_file_xlsx = output_file_path_xlsx
-    # filemeta.save()
-
     filemeta = File.objects.get(pk=pk)
     if not filemeta.has_prediction:
         output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
@@ -447,13 +478,45 @@ def predict_result(request, pk):
         domain_list = []
 
         # prediction_result = tasks.predict_runner.delay(filemeta.input_file.path)
-
         # dict_data = prediction_result.get()
+
+        # for the keyword model-----------------------------------------------------------------------------------------
+
+        # check whether input files has domains or not
+        # if filemeta.domain_present:
+        #     domain_present = True
+        # else:
+        #     domain_present = False
+
+        # proposal = filemeta.proposal
+        # domain_queryset = Domain.objects.filter(proposal_name = proposal).values_list('domain_name', flat=True)
+        # domain_set = set(domain_queryset)
+        # domain_list = list(domain_set)
+
+        # domain_queryset_2 = Domain.objects.filter(proposal_name = proposal)
+        # keyword_global_list = []
+        # for domain_obj in domain_queryset_2:
+        #     keyword_queryset = Keyword.objects.filter(domain_name = domain_obj).values_list('keyword', flat=True)
+        #     keyword_set = set(keyword_queryset)
+        #     keyword_list = list(keyword_set)
+        #     keyword_global_list.append(keyword_list)
+
+        # domain_keyword_dict = {}
+        # domain_keyword_dict = dict(zip(domain_list, keyword_global_list))
+
+       
+
+        # domain_keyword_dict = {
+        # 'hw': ['bedbugs', 'cctv', 'pipeline', 'Open spaces', 'gutter', 'garbage',
+        #             'rats', 'mice', 'robbery', 'theft', 'passage', 'galli', 'lane',
+        #             'light', 'bathrooms not clean', 'toilets not clean', 'playarea', 'mosquito', 'fogging','water'],
+        # }
+
+        # sm = SimilarityMapping(filemeta.input_file.path, domain_present, domain_keyword_dict)
+        # ---------------------------------------------------------------------------------------------------------------
 
         sm = SimilarityMapping(filemeta.input_file.path)
         dict_data = sm.driver()
-        
-        # sm = SimilarityMapping(dict --> {domain: set_of_keywords} ,response_filepath)
 
         if dict_data:
             filemeta.has_prediction = True
@@ -468,27 +531,65 @@ def predict_result(request, pk):
 
         download_output = pd.ExcelWriter(output_file_path_xlsx, engine='xlsxwriter')
 
-        for domain in dict_data:
-            print('Writing Excel for domain %s' % domain)
-            df = pd.DataFrame({key:pd.Series(value) for key, value in dict_data[domain].items()})
+        for domain, cat_dict in dict_data.items():
+            domain_columns = list(cat_dict.keys())
+            subdomain_columns = ['response', 'score']
+            temp_column_index = 0
+            codes = []
+            subcodes = []
+
+            for dc in domain_columns:
+                codes.append(temp_column_index)
+                codes.append(temp_column_index)
+                subcodes.append(0)
+                subcodes.append(1)
+                temp_column_index += 1
+            multiIndex = pd.MultiIndex(levels = [domain_columns, subdomain_columns], labels = [codes, subcodes])
+
+            df = pd.DataFrame(columns=multiIndex)
+
+            temp_responses = []
+            temp_scores = []
+
+            for cat_as_key, res_dict_list in cat_dict.items():
+                temp_df_res = []
+                temp_df_score = []
+
+                if cat_as_key!='Novel':
+                    for res_dict in res_dict_list:
+                        temp_df_res.append(res_dict['response'])
+                        temp_df_score.append(res_dict['score'])
+                else:
+                    for res_list in res_dict_list.values():
+                        temp_df_res.extend(res_list)
+                    for response in temp_df_res:
+                        temp_df_score.append(-1)
+
+                temp_responses.append(temp_df_res)
+                temp_scores.append(temp_df_score)
+
+            del temp_df_res, temp_df_score
+
+            len_holder = sorted(temp_responses, key=len, reverse=True)
+            len_holder = len(len_holder[0])
+            weighted_temp_responses = []
+            weighted_temp_scores = []
+
+            for temp_df_res, temp_df_score in zip(temp_responses, temp_scores):
+                for x in range(len_holder - len(temp_df_score)):
+                    temp_df_res.append('')
+                    temp_df_score.append('')
+                weighted_temp_responses.append(temp_df_res)
+                weighted_temp_scores.append(temp_df_score)
+
+            del temp_responses, temp_scores, temp_df_res, temp_df_score
+
+            for cat_as_key, temp_df_res, temp_df_score in zip(cat_dict.keys(), weighted_temp_responses, weighted_temp_scores):
+                df[cat_as_key, 'response'] = temp_df_res
+                df[cat_as_key, 'score'] = temp_df_score
+
             df.to_excel(download_output, sheet_name=domain)
         download_output.save()
-
-        # colNames=[]
-        # rows=[]
-        # for domain in dict_data:
-        #     print('Writing Excel for domain %s' % domain)
-        #     for category in dict_data[domain].keys():
-        #         colNames.append(category)
-        #         print("==================category list===========")
-        #         for i in colNames:
-        #             print("category: ", i)
-        #     for key, value in dict_data[domain].items():
-        #         rows.append(pd.Series(value))
-        #     # df = pd.DataFrame({key:pd.Series(value) for key, value in dict_data[domain].items()})
-        #     df = pd.DataFrame(rows, columns=colNames)
-        #     df.to_excel(download_output, sheet_name=domain)
-        # download_output.save()
 
         filemeta.output_file_xlsx = output_file_path_xlsx
         filemeta.save()
@@ -524,22 +625,18 @@ def predict_result(request, pk):
             domain_stats.append(column)
         dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
 
-    # with open('test_dict_data1.json', 'w') as temp:
-    #     json.dump(dict_data, temp)
-
     if request.is_ajax():
         domain = request.GET.get('domain_name')
         cardview_data = dict_data[domain]
-        # intIndex = 1
-        # index = cardview_data.startIndex.advancedBy(intIndex)
             
         if 'category' in request.GET:
             category = request.GET.get('category')
             print(type(category))
         else:
-            for key, val in cardview_data.items():
+            for key in cardview_data.items():
                 category = key
                 break
+                
         return render(request, './Venter/domain_data.html', {'cardview_data':cardview_data, 'category': category})
 
     return render(request, './Venter/prediction_result.html', {
@@ -578,17 +675,14 @@ def predict_csv(request, pk):
         output_file_path_csv = os.path.join(output_directory_path, output_csv_file_name)
         
         input_file_path = filemeta.input_file.path
-        csvfile = pd.read_csv(input_file_path, sep=',', header=0, encoding='latin1')
+        csvfile = pd.read_csv(input_file_path, sep=',', header=0, encoding='utf-8-sig')
         csvfile.columns = [col.strip() for col in csvfile.columns]
 
         complaint_description = list(csvfile['complaint_description'])
         ward_name = list(csvfile['ward_name'])
         ward_list = list(set(ward_name))
 
-        print("--------------------------inside predict csv function")
-        print("============complaint description type: ", type(complaint_description))
         print(complaint_description)
-        print("============ward list type: ", type(ward_list))
 
         date_created = []
 
@@ -635,8 +729,8 @@ def predict_csv(request, pk):
         print('JSON output saved.')
         print('Done.')
 
-        with open(input_file_path, 'r', encoding="latin1") as f1:
-            with open(output_file_path_csv, 'w', encoding="latin1") as f2:
+        with open(input_file_path, 'r', encoding="utf-8-sig") as f1:
+            with open(output_file_path_csv, 'w', encoding="utf-8-sig") as f2:
                 for line in f1:
                     f2.write(line)
 
@@ -661,7 +755,7 @@ def predict_csv(request, pk):
             temp_list = []
             custom_category_list = []
             output_file_path_xlsx = filemeta.output_file_xlsx.path
-            output_xlsx_csv_file = pd.read_csv(output_file_path_xlsx, sep=',', header=0)
+            output_xlsx_csv_file = pd.read_csv(output_file_path_xlsx, sep=',', header=0, encoding='utf-8-sig')
             temp_list = output_xlsx_csv_file['Predicted_Category']
 
             for item in temp_list:
@@ -675,7 +769,7 @@ def predict_csv(request, pk):
 
     # preparing ward list and date list for multi-filter widget
     input_file_path = filemeta.input_file.path
-    input_csv_file = pd.read_csv(input_file_path, sep=',', header=0, encoding='latin1')
+    input_csv_file = pd.read_csv(input_file_path, sep=',', header=0, encoding='utf-8-sig')
     input_csv_file.columns = [col.strip() for col in input_csv_file.columns]
 
     date_created = []
@@ -719,7 +813,7 @@ def download_table(request, pk):
         new_sorted_category_list.append(temp3)
 
     output_csv_file_path = filemeta.output_file_xlsx.path
-    csv_file = pd.read_csv(output_csv_file_path, sep=',', header=0)
+    csv_file = pd.read_csv(output_csv_file_path, sep=',', header=0, encoding='utf-8-sig')
 
     if status == "True":
         filemeta.file_saved_status = True
@@ -727,7 +821,7 @@ def download_table(request, pk):
             csv_file = csv_file.drop("Predicted_Category", axis=1)
         csv_file.insert(0, "Predicted_Category", new_sorted_category_list)
 
-    csv_file.to_csv(output_csv_file_path, index=False)
+    csv_file.to_csv(output_csv_file_path, index=False, encoding='utf-8-sig')
 
     filemeta.output_file_xlsx = output_csv_file_path
     filemeta.save()
@@ -772,9 +866,7 @@ def wordcloud_contents(request, pk):
         wordcloud_category_list = []
         output_file_path = filemeta.output_file_xlsx.path
         output_file = pd.read_csv(output_file_path, sep=',', header=0)
-        
-        temp_dict = defaultdict(list)
-        
+        temp_dict = defaultdict(list) 
         for predicted_category_str, complaint_description in zip(output_file['Predicted_Category'], output_file['complaint_description']):
             predicted_category_list = literal_eval(predicted_category_str)
             if predicted_category_list:
@@ -810,8 +902,6 @@ def wordcloud_contents(request, pk):
         domain_name = request.POST['domain_name']
         wordcloud_category_list = json.loads(request.POST['category_list'])
 
-        # with open('wordcloud_output_data.json') as json_file:
-        #             output_dict = json.load(json_file)
         output_dict = generate_wordcloud(filemeta.output_file_json.path)
 
         domain_items_list = output_dict[domain_name]
@@ -827,15 +917,13 @@ def wordcloud_contents(request, pk):
 @require_http_methods(["POST"])
 def chart_editor(request, pk):
     """
-        View logic to display chart editor for the selcted domain
+        View logic to display chart editor for the selected domain
     """
     filemeta = File.objects.get(pk=pk)
-    json_file_path = os.path.join(BASE_DIR, 'scored_results.json')
     dict_data = {}
     domain_list = []
 
-    with open(json_file_path) as json_file:
-        dict_data = json.load(json_file)
+    dict_data = json.load(filemeta.output_file_json)
 
     filemeta = File.objects.get(pk=pk)
     output_directory_path = os.path.join(MEDIA_ROOT, f'{filemeta.uploaded_by.organisation_name}/{filemeta.uploaded_by.user.username}/{filemeta.uploaded_date.date()}/output')
@@ -846,7 +934,6 @@ def chart_editor(request, pk):
     temp1 = filemeta.filename
     temp2 = os.path.splitext(temp1)
     custom_input_file_name = temp2[0]
-    
     output_json_file_name = 'results__'+custom_input_file_name+'.json'
     output_xlsx_file_name = 'results__'+custom_input_file_name+'.xlsx'
 
@@ -885,5 +972,4 @@ def chart_editor(request, pk):
             domain_stats.append(column)
         dict_data[domain_name]['Statistics'] = jsonpickle.encode(domain_stats)
         domain_name = request.POST['input_domain_name']
-   
     return render(request, './Venter/chart_editor.html', {'filemeta': filemeta, 'domain_list': domain_list, 'dict_data': json.dumps(dict_data), 'domain_name': domain_name})
