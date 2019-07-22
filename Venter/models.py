@@ -145,7 +145,7 @@ class Domain(models.Model):
         on_delete=models.CASCADE,
     )
     domain_name = models.CharField(
-        max_length=200
+        max_length=200,
     )
 
     def __str__(self):
@@ -156,6 +156,7 @@ class Domain(models.Model):
         Declares a plural name for Domain model
         """
         verbose_name_plural = 'Domain'
+        unique_together = ('proposal_name', 'domain_name',)
 
 class Keyword(models.Model):
     """

@@ -327,13 +327,76 @@ Styling for add_proposal.html
     }
   }
 
+  @media (max-width: 719px){
+    .form-control{
+      width: 600px;
+    }
+    input#input_custom_keyword_only.form-control.keyword_input_holder{
+      width: 505px;
+    }
+    ul.list-group.keyword_list{
+      width: 505px;
+    }
+    textarea#domain_paragraph.form-control{
+      width: 600px;
+    }
+    input#id_proposal_name.form-control{
+      width: 600px;
+    }
+    input#id_domain_name.form-control{
+      width: 600px;
+    }
+  }
+
+  @media (max-width: 685px){
+    input#input_custom_keyword_only.form-control.keyword_input_holder{
+      width: 530px;
+    }
+    ul.list-group.keyword_list{
+      width: 530px;
+    }
+    .form-control{
+      width: 550px;
+    }
+    textarea#domain_paragraph.form-control{
+      width: 550px;
+    }
+    input#id_proposal_name.form-control{
+      width: 550px;
+    }
+    input#id_domain_name.form-control{
+      width: 550px;
+    }
+  }
+
+  @media (max-width: 631px){
+    input#input_custom_keyword_only.form-control.keyword_input_holder{
+      width: 400px;
+    }
+    ul.list-group.keyword_list{
+      width: 400px;
+    }
+    .form-control{
+      width: 450px;
+    }
+    textarea#domain_paragraph.form-control{
+      width: 450px;
+    }
+    input#id_proposal_name.form-control{
+      width: 430px;
+    }
+    input#id_domain_name.form-control{
+      width: 450px;
+    }
+  }
+
   @media (max-width: 576px){
     .inner-proposal {
       width: 100%;
       left: 0; 
     } 
     .form-control{
-      width: 400px;
+      width: 460px;
     }
     input#input_custom_keyword_only.form-control.keyword_input_holder{
       width: 400px;
@@ -352,11 +415,14 @@ Styling for add_proposal.html
       height: 19px;
     }
     input#id_proposal_name.form-control{
-      width: 460px;
+      width: 430px;
     }
     input#id_domain_name.form-control{
       width: 460px;
     } 
+    textarea#domain_paragraph.form-control{
+      width: 460px;
+    }
     .domain-name-holder{
       width:460px;
     }

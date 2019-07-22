@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.core.mail import mail_admins
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -311,40 +312,46 @@ class AddProposalView(LoginRequiredMixin, CreateView):
         domain_name = request.POST['domain_name']
         temp_keyword_list = json.loads(request.POST['keyword_list'])
         temp_final_submit = request.POST['final_submit']
-        temp_successful_submit = request.POST['successful_submit']
+        temp_one_save_operation = request.POST['one_save_operation']
 
         if temp_final_submit == "true":
             final_submit = True
         elif temp_final_submit == "false":
             final_submit = False
 
-        if temp_successful_submit == "True":
-            successful_submit = True
-        elif temp_successful_submit == "False":
-            successful_submit = False
-
-        if not successful_submit:
+        if temp_one_save_operation == "True":
+            one_save_operation = True
+        elif temp_one_save_operation == "False":
+            one_save_operation = False
+        
+        if not one_save_operation:
             proposal_form = ProposalForm(request.POST)
             proposal_valid = proposal_form.is_valid()
             if proposal_valid:
                 proposal_name = proposal_form.cleaned_data['proposal_name']
                 proposal_obj = Proposal.objects.create(proposal_name=proposal_name)
                 proposal_obj.save()
+
+                domain_obj = Domain.objects.create(
+                proposal_name=proposal_obj, domain_name=domain_name)
+                domain_obj.save()
             else:
                 return render(request, './Venter/add_proposal.html',
-                                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'successful_submit': False})
+                                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'one_save_operation': False})
+        else:
+            proposal_obj = Proposal.objects.get(proposal_name=proposal_name)
+            try:
+                domain_obj = Domain.objects.create(proposal_name=proposal_obj, domain_name=domain_name)
+            except IntegrityError as e:
+                domain_form.add_error('domain_name', 'Domain for this Domain name already exists')
+                return render(request, './Venter/add_proposal.html',
+                                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'one_save_operation': True, 'proposal_name': proposal_name})
 
         keyword_list = []
         for temp1 in temp_keyword_list:
             temp2 = temp1.lstrip()
             temp3 = temp2.rstrip()
             keyword_list.append(temp3)
-
-        proposal_obj = Proposal.objects.get(proposal_name = proposal_name)
-
-        domain_obj = Domain.objects.create(
-            proposal_name=proposal_obj, domain_name=domain_name)
-        domain_obj.save()
 
         for keyword in keyword_list:
             keyword_obj = Keyword.objects.create(
@@ -353,15 +360,13 @@ class AddProposalView(LoginRequiredMixin, CreateView):
 
         proposal_form = ProposalForm()
         domain_form = DomainForm()
-
+                
         if final_submit:
             return render(request, './Venter/add_proposal.html',
-                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'final_submit': final_submit, 'successful_submit': True})
+                    {'domain_form': domain_form, 'final_submit': final_submit, 'one_save_operation': True})
         else:
             return render(request, './Venter/add_proposal.html',
-                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'final_submit': final_submit, 'successful_submit': True, 'proposal_name': proposal_name})
-        return render(request, './Venter/add_proposal.html',
-                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'successful_submit': False})
+                    {'proposal_form': proposal_form, 'domain_form': domain_form, 'final_submit': final_submit, 'one_save_operation': True, 'proposal_name': proposal_name})
 
     def get(self, request, *args, **kwargs):
         proposal_form = ProposalForm()
@@ -381,7 +386,7 @@ class AddProposalView(LoginRequiredMixin, CreateView):
             return render(request, './Venter/proposal_keyword_data.html',
                             {'keyword_list': keyword_list, 'keyword_dropdown': keyword_dropdown})
         return render(request, './Venter/add_proposal.html',
-                            {'proposal_form': proposal_form, 'domain_form': domain_form, 'keyword_form': keyword_form, 'successful_submit': False})
+                            {'proposal_form': proposal_form, 'domain_form': domain_form, 'keyword_form': keyword_form, 'one_save_operation': False})
 
 @require_http_methods(["GET"])
 def about_us(request):
@@ -866,7 +871,7 @@ def wordcloud_contents(request, pk):
         wordcloud_category_list = []
         output_file_path = filemeta.output_file_xlsx.path
         output_file = pd.read_csv(output_file_path, sep=',', header=0)
-        temp_dict = defaultdict(list) 
+        temp_dict = defaultdict(list)
         for predicted_category_str, complaint_description in zip(output_file['Predicted_Category'], output_file['complaint_description']):
             predicted_category_list = literal_eval(predicted_category_str)
             if predicted_category_list:
@@ -910,6 +915,14 @@ def wordcloud_contents(request, pk):
         for domain_item in domain_items_list:
             if list(domain_item.keys())[0].split('\n')[0].strip() == category_name.strip():
                 words = list(domain_item.values())[0]
+
+        for word, freq in words.items():
+            if(word == 'items'):
+                words['item'] = words.pop('items')
+        temp_list = sorted(words.items())
+        words = {}
+        words = dict(temp_list)
+
         return render(request, './Venter/wordcloud.html', {'category_list': wordcloud_category_list, 'filemeta': filemeta, 'words': words, 'domain_name': domain_name, 'category_name': category_name})
 
 

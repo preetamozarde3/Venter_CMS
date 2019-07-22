@@ -67,7 +67,17 @@
             }
         });
         $(".edit_proposal_name_btn").on("click", function () {
-            $("#id_proposal_name").removeAttr('readonly');
+            '{% if one_save_operation %}'
+                if($('#id_proposal_name').prop('readonly')){
+                    alert("Proposal name cannot be edited");
+                }
+                else{
+                    $("#id_proposal_name").removeAttr('readonly');
+                }
+            '{% else %}'
+                $("#id_proposal_name").removeAttr('readonly');
+            '{% endif %}'
+            
         });
         $(document).on("click", ".delete-keyword-btn", function() {
             var parent = $(this).closest("div");
@@ -230,7 +240,7 @@
             document.getElementById('domain_name').value = document.getElementById("id_domain_name").value;
             document.getElementById('keyword_list').value = JSON.stringify(keyword_list);
             document.getElementById('final_submit').value = flag;
-            document.getElementById('successful_submit').value = '{{successful_submit}}';
+            document.getElementById('one_save_operation').value = '{{one_save_operation}}';
 
             $('div#domain-present-holder textarea').prop("disabled",true);
             document.getElementById('save_domain_form').submit();
@@ -239,45 +249,53 @@
     }
     function add_domain_paragraph_holder()
     {
-        var label_domain_name = $("#id_domain_name").val();
-        if (label_domain_name.replace(/\s/g, '').length == 0) {
-            alert("Please enter a name for the domain");
-            $("#id_domain_name").focus();
-        }
-        else{
-            var regex = /^[a-zA-Z\s]*$/;
-            if(regex.test(label_domain_name) == false){
-                if($('#domain-name-error-div').length == 0) {
-                    $(".inner-proposal")
-                    .append('<br>'+
-                                '<div class="alert alert-danger" id="domain-name-error-div">'+
-                                    '<strong>Domain name may contain letters and spaces only</strong>'+
-                                '</div>')
-                    $("#id_domain_name").val('');
-                }
+        var domain_present_holder = document.getElementById("domain-present-holder");
+        if(domain_present_holder.style.display == "block"){
+            alert("Error: Domain paragraph aleady present");
+        } 
+        else if(domain_present_holder.style.display == "none"){
+            var label_domain_name = $("#id_domain_name").val();
+            if (label_domain_name.replace(/\s/g, '').length == 0) {
+                alert("Please enter a name for the domain");
+                $("#id_domain_name").focus();
             }
             else{
-                if($('#domain-name-error-div').length != 0) {
-                    $('#domain-name-error-div').remove();
+                var regex = /^[a-zA-Z\s]*$/;
+                if(regex.test(label_domain_name) == false){
+                    if($('#domain-name-error-div').length == 0) {
+                        $(".inner-proposal")
+                        .append('<br>'+
+                                    '<div class="alert alert-danger" id="domain-name-error-div">'+
+                                        '<strong>Domain name may contain letters and spaces only</strong>'+
+                                    '</div>')
+                        $("#id_domain_name").val('');
+                    }
                 }
-                var domain_present_holder = document.getElementById("domain-present-holder");
-                domain_present_holder.style.display = "block";
-                $("#remove_domain_present_holder").removeClass("btn-secondary").addClass("btn-danger");
-                $(".keyword_list").empty();
+                else{
+                    if($('#domain-name-error-div').length != 0) {
+                        $('#domain-name-error-div').remove();
+                    }
+                    domain_present_holder.style.display = "block";
+                    $("#remove_domain_present_holder").removeClass("btn-secondary").addClass("btn-danger");
+                    $(".keyword_list").empty();
+                }
             }
         }
     }
     function remove_domain_paragraph_holder(){
-        if($("#domain-present-holder").length != 0){
-            var domain_present_holder = document.getElementById("domain-present-holder");
+        var domain_present_holder = document.getElementById("domain-present-holder");
+        if(domain_present_holder.style.display == "block"){
             domain_present_holder.style.display = "none";
             $(".keyword_list").empty();
+        }
+        else if(domain_present_holder.style.display == "none"){
+            alert("Error: No domain paragraph present");
         }
     }
 </script>
 
 {% if user.is_staff %}
-    {% if successful_submit %}
+    {% if one_save_operation %}
         {% if final_submit %}
             <script type="text/javascript">
                 $(document).ready(function () {
@@ -289,24 +307,23 @@
                 $(document).ready(function () {
                     $("#id_proposal_name").val('{{ proposal_name }}');
                     $("#id_proposal_name").attr('readonly', '');
-                    $(".edit_proposal_name_btn").prop('disabled', true);
                 });
             </script>
-        {% endif %}
+        {% endif %} 
     {% else %}
-        <!-- continue --> 
+        <!--continue-->
     {% endif %}    
 
     <div class="wrapper-proposal">
         <div class="inner-proposal">
             <form method="post" enctype="multipart/form-data" id="save_domain_form">
                 {% csrf_token %}
-
                 <input type="hidden" id="proposal_name" name="proposal_name" value=""/>
                 <input type="hidden" id="domain_name" name="domain_name" value=""/>
                 <input type="hidden" id="keyword_list" name="keyword_list" value=""/>
                 <input type="hidden" id="final_submit" name="final_submit" value=""/>
-                <input type="hidden" id="successful_submit" name="successful_submit" value=""/>
+                <input type="hidden" id="one_save_operation" name="one_save_operation" value=""/>
+                <input type="hidden" id="error_exist" name="error_exist" value=""/>
 
                 <h3 class="title">Proposal Details</h3>
                 <div class="row proposal-form-holder">
@@ -381,38 +398,62 @@
                         </button>        
                     </div>
                 </div>
-            </form>
-            {% if proposal_form.errors %}
-            {% for field in proposal_form %}
-            {% for error in field.errors %}
-            <br>
-            <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-            </div>
-            {% endfor %}
-            {% endfor %}
-            {% endif %}
+            </form>    
 
             {% if domain_form.errors %}
-            {% for field in domain_form %}
-            {% for error in field.errors %}
-            <br>
-            <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-            </div>
-            {% endfor %}
-            {% endfor %}
+                {% for field in domain_form %}
+                    {% for error in field.errors %}
+                        <br>
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                {% if proposal_form.errors %}
+                    <script>
+                        $("#id_proposal_name").attr('readonly', '');
+                        $(".edit_proposal_name_btn").prop('disabled', true);
+                    </script>    
+                {% endif %}
+            {% else %}
+                {% if proposal_form.errors %}
+                    <script>
+                        $(document).ready(function () {
+                            console.log("3- throwing error for p.e for no reason!");
+                        });    
+                    </script>    
+                    {% for field in proposal_form %}
+                        {% for error in field.errors %}
+                            <br>
+                            <div class="alert alert-danger" id="proposal-exists-error-div">
+                                <strong>{{ error|escape }}</strong>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+                {% if one_save_operation %}
+                    <script>
+                        $(document).ready(function () {
+                            console.log("1- prpoposal already made. no need for checks");
+                            console.log("2 - remove this proposal exists - error");
+                            if($('#proposal-exists-error-div').length != 0) {
+                                $('#proposal-exists-error-div').remove();
+                            }
+                            $("#id_proposal_name").attr('readonly', '');
+                        });
+                    </script>    
+                {% endif %}
             {% endif %}
 
             {% if keyword_form.errors %}
-            {% for field in keyword_form %}
-            {% for error in field.errors %}
-            <br>
-            <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-            </div>
-            {% endfor %}
-            {% endfor %}
+                {% for field in keyword_form %}
+                    {% for error in field.errors %}
+                        <br>
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
             {% endif %}
         </div>
         <!-- Modal -->
@@ -421,9 +462,6 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
                         <div class="text-center">
                             <img src="../../static/assets/img/tick_mark.png" alt="" class="tick_mark-proposal">
                         </div>

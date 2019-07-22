@@ -32,11 +32,14 @@
             '{% if words %}'
                 console.log('words dict exists');
                 console.log('{{words}}');
+                '{% for i,j in words.items %}'
+                    var weight = parseInt('{{j}}');
+                    words.push({"freq": weight+10, "word": '{{i}}'});
+                '{% endfor %}'
+            '{% else %}'
+                console.log("error has occured in words dict");    
             '{% endif %}'
-            '{% for i,j in words.items %}'
-                var weight = parseInt('{{j}}');
-                words.push({"freq": weight+10, "word": '{{i}}'});
-            '{% endfor %}'
+            
 
 
             words.sort(function(a, b) {
@@ -202,32 +205,39 @@
 
         $(".wordcloud-btn").click(function(event){
             '{% if filemeta.uploaded_by.organisation_name|stringformat:"s" == "CIVIS" %}'
-                    var category_name = $('#category_dropdown').val();
-                    let category_list = []
-                    $("#category_dropdown option").each(function(){
-                        if ($(this).val() == '0')
-                        {
-                            //pass;
-                        }
-                        else
-                        {
-                            let temp = $(this).text();
-                            let cat = temp.replace(/^\s+|\s+$/g, "");
-                            category_list.push(cat);
-                        }
-                    })
-                    document.getElementById('category_list').value = JSON.stringify(category_list);
-                    document.getElementById('category_name').value = category_name;
 
-                    var domain = document.getElementById('label_domain_name').innerHTML;
-                    document.getElementById('domain_name').value = domain;
-                    document.getElementById('category_form').submit();
+                    var selected_option = $('#category_dropdown option:selected').val();
+                    
+                    if(selected_option == "0"){
+                        alert("Please select a category");
+                    }
+                    else{
+                        var category_name = $('#category_dropdown').val();
+                        let category_list = []
+                        $("#category_dropdown option").each(function(){
+                            if ($(this).val() == '0')
+                            {
+                                //pass;
+                            }
+                            else
+                            {
+                                let temp = $(this).text();
+                                let cat = temp.replace(/^\s+|\s+$/g, "");
+                                category_list.push(cat);
+                            }
+                        })
+                        document.getElementById('category_list').value = JSON.stringify(category_list);
+                        document.getElementById('category_name').value = category_name;
+
+                        var domain = document.getElementById('label_domain_name').innerHTML;
+                        document.getElementById('domain_name').value = domain;
+                        document.getElementById('category_form').submit();
+                    }
             '{% elif filemeta.uploaded_by.organisation_name|stringformat:"s" == "ICMC" %}'
                     document.getElementById('category_form').submit();
             '{% endif %}'    
         });   
     });
-
 </script>
 
 <div class="outer-wc">

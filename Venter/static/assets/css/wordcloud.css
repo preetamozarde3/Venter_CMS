@@ -3,8 +3,8 @@ Styling for wordcloud.html
 */
 
 .outer-wc{
-    background-color: whitesmoke;
-    height: 100vh;
+    background-color: rgb(248, 247, 246);
+    height: 820px;
     justify-content: center;
     padding-top: 2vh;
 }
@@ -12,7 +12,7 @@ Styling for wordcloud.html
 .inner-wc{
     padding-top: 2vh;
     padding: 1vw; 
-    max-height: 100vh;
+    height: 820px;
     max-width: 100vw;
     align-items: center;
     justify-content: center;
@@ -29,8 +29,14 @@ div.sidebar-wrapper li.wordcloud-item{
 }
 
 .wordcloud-container{
-    height: 85vh;
+    height: 635px;
     border: 1px solid darkslategray;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+canvas{
+    height: 635px;
     overflow-y: scroll;
     overflow-x: scroll;
 }
