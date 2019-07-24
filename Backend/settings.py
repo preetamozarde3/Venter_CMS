@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
+    '192.168.75.128',
     'venter-msr.herokuapp.com',
 ]
 
@@ -78,8 +79,12 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'venter',
+        'USER': 'preetamozarde3',
+        'PASSWORD': 'pass@1234',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -116,10 +121,10 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
-# MEDIA_URL = '/media/'
-MEDIA_URL = '/MEDIA/'
+MEDIA_URL = '/'
+# MEDIA_URL = '/MEDIA/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "MEDIA")
+MEDIA_ROOT = 'media'
 
 LOGIN_REDIRECT_URL = 'upload_file'
 LOGIN_URL = 'login'
@@ -142,6 +147,7 @@ EMAIL_PORT = 587
 ADMINS = [('Venter Admin', 'venterproject@gmail.com')]
 
 MAX_UPLOAD_SIZE = "5242880"
+MAX_PROFILE_PICTURE_UPLOAD_SIZE = "1048576"
 
 FILE_UPLOAD_TYPE = 'csv'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

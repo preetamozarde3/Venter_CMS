@@ -1,6 +1,7 @@
 """Helper functions for Venter modules."""
 import os
 from datetime import date
+from Backend.settings import MEDIA_ROOT
 def get_file_upload_path(instance, filename):
     """
     Returns a custom MEDIA path for files uploaded by a user
@@ -22,5 +23,4 @@ def get_user_profile_picture_path(instance, filename):
     Returns a custom MEDIA path for profile picture uploaded by user
     Eg: /MEDIA/User Profile Picture/xyz/user1/image2.png
     """
-    return os.path.join(
-        f'User Profile Picture/{instance.organisation_name}/{instance.user.username}/{filename}')
+    return os.path.join(MEDIA_ROOT, f'User Profile Picture/{instance.organisation_name}/{instance.user.username}/{filename}')
