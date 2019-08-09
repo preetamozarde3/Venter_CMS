@@ -1,0 +1,13 @@
+.vscode/
+.idea/*
+__pycache__/
+db.sqlite3
+media/**
+htmlcov/
+stats.txt
+venv/
+staticfiles/*
+Venter/ML_model/sentence_model/MAX.bin
+Venter/ML_model/ICMC/dataset/dataset_mcgm_clean/word_vectors_mcgm.pickle
+Venter/ML_model/ICMC/dataset/dataset_mcgm_clean/word_vectors_mcgm_.picke
+
