@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    '192.168.75.128',
+    '23.96.57.157',
+    'venter.eastus.cloudapp.azure.com',
     'venter-msr.herokuapp.com',
 ]
 
@@ -80,9 +81,9 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'venter',
-        'USER': 'preetamozarde3',
-        'PASSWORD': 'pass@1234',
+        'NAME': 'venter_db',
+        'USER': 'venter_user',
+        'PASSWORD': 'adminadmin',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -143,10 +144,11 @@ EMAIL_PORT = 587
 
 # Maximum size of file uploaded by user
 # 5242880 = 5 MB
+# 10485760 = 10 MB
 
 ADMINS = [('Venter Admin', 'venterproject@gmail.com')]
 
-MAX_UPLOAD_SIZE = "5242880"
+MAX_UPLOAD_SIZE = 5242880
 MAX_PROFILE_PICTURE_UPLOAD_SIZE = "1048576"
 
 FILE_UPLOAD_TYPE = 'csv'

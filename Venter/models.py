@@ -59,7 +59,7 @@ class Profile(models.Model):
         upload_to=get_user_profile_picture_path,
         null=True,
         blank=True,
-        default='default-avatar.png'
+        default=os.path.join(f'default-avatar.png')
     )
     phone_number = models.CharField(
         blank=True,
